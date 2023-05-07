@@ -1,3 +1,6 @@
+[submodule "vkryl/core"]
+	path = vkryl/core
+	url = https://github.com/TGX-Android/X-Core.git
 [submodule "vkryl/android"]
 	path = vkryl/android
 	url = https://github.com/TGX-Android/X-Android.git
