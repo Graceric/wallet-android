@@ -4,3 +4,7 @@
 [submodule "vkryl/android"]
 	path = vkryl/android
 	url = https://github.com/TGX-Android/X-Android.git
+[submodule "neodiX42/ton4j"]
+	path = neodiX42/ton4j
+	url = https://github.com/Arseny271/ton4j.git
+	branch = android-wallet
