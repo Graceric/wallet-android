@@ -8,6 +8,3 @@
 	path = neodiX42/ton4j
 	url = https://github.com/Arseny271/ton4j.git
 	branch = android-wallet
-[submodule "app/jni/ton"]
-	path = app/jni/ton
-	url = https://github.com/ton-blockchain/ton.git
