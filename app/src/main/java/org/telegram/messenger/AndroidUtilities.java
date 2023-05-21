@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Vibrator;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -51,6 +52,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EdgeEffect;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -72,9 +74,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Hashtable;
-
-import drinkless.org.ton.Client;
-import drinkless.org.ton.TonApi;
 
 public class AndroidUtilities {
 
@@ -118,6 +117,9 @@ public class AndroidUtilities {
         if (activity == null) {
             return;
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            activity.getWindow().setDecorFitsSystemWindows(true);
+        }
         activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         adjustOwnerClassGuid = classGuid;
     }
@@ -136,6 +138,9 @@ public class AndroidUtilities {
             return;
         }
         if (adjustOwnerClassGuid == classGuid) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                activity.getWindow().setDecorFitsSystemWindows(false);
+            }
             activity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         }
     }
@@ -583,6 +588,22 @@ public class AndroidUtilities {
         }
     }
 
+    public static void shakeAndVibrateView(final View view, final float x, final int num) {
+        shakeView(view, x, num);
+        vibrate(view.getContext());
+    }
+
+    public static void vibrate (Context context) {
+        try {
+            Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+            if (v != null) {
+                v.vibrate(200);
+            }
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+    }
+
     public static void shakeView(final View view, final float x, final int num) {
         if (view == null) {
             return;
@@ -620,6 +641,15 @@ public class AndroidUtilities {
             android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
             android.content.ClipData clip = android.content.ClipData.newPlainText("label", str);
             clipboard.setPrimaryClip(clip);
+        } catch (Exception e) {
+            FileLog.e(e);
+        }
+    }
+
+    public static void pasteFromClipboard (EditText editText) {
+        try {
+            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) ApplicationLoader.applicationContext.getSystemService(Context.CLIPBOARD_SERVICE);
+            editText.setText(clipboard.getText());
         } catch (Exception e) {
             FileLog.e(e);
         }
@@ -929,14 +959,6 @@ public class AndroidUtilities {
 
     public static boolean allowScreenCapture() {
         return true;
-    }
-
-    public static void getTonWalletSalt(int account, TonController.BytesCallback callback) {
-        callback.run(new byte[0]);
-    }
-
-    public static void processTonUpdate(int account, Client client, TonApi.Object object) {
-
     }
 
     public static File getSharingDirectory() {

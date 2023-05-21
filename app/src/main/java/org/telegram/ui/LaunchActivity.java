@@ -14,7 +14,6 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -23,20 +22,22 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 
+import org.TonController.Parsers.UriParser;
+import org.TonController.TonController;
+import org.UI.Fragments.Main.WalletActivity;
+import org.UI.Fragments.Create.WalletCreateStartActivity;
+import org.UI.Fragments.Passcode.PasscodeActivity;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
-import org.telegram.messenger.UserConfig;
-import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.ActionBarLayout;
+import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.DrawerLayoutContainer;
 import org.telegram.ui.ActionBar.Theme;
-import org.telegram.ui.Wallet.WalletActivity;
-import org.telegram.ui.Wallet.WalletCreateActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -153,24 +154,21 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
 
     private BaseFragment getCurrentWalletFragment() {
         BaseFragment fragment;
-        UserConfig userConfig = UserConfig.getInstance(currentAccount);
-        /*if (!TextUtils.isEmpty(userConfig.tonEncryptedData) && TextUtils.isEmpty(userConfig.tonAccountAddress) && userConfig.tonWalletVersion == 0) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(LocaleController.getString("Wallet", R.string.Wallet));
-            builder.setMessage(LocaleController.getString("WalletSwitchedToMainnet", R.string.WalletSwitchedToMainnet));
-            builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
-            builder.show();
-            userConfig.clearTonConfig();
-            userConfig.saveConfig(true);
-        }*/
-        if (TextUtils.isEmpty(userConfig.tonEncryptedData)) {
-            fragment = new WalletCreateActivity(WalletCreateActivity.TYPE_CREATE);
-        } else if (!userConfig.tonCreationFinished) {
-            WalletCreateActivity activity = new WalletCreateActivity(WalletCreateActivity.TYPE_KEY_GENERATED);
+        if (TonController.getInstance(currentAccount).isWalletNotCreated()) {
+            fragment = new WalletCreateStartActivity();
+        } /*else if () {
+            WalletCreateCongratulationsActivity activity = new WalletCreateCongratulationsActivity();
             activity.setResumeCreation();
             fragment = activity;
-        } else {
-            fragment = new WalletActivity();
+        }*/ else {
+            if (BuildVars.ASK_PASSCODE_ON_START) {
+                PasscodeActivity passcodeActivity = new PasscodeActivity();
+                passcodeActivity.setOnSuccessPasscodeDelegate(code ->
+                    passcodeActivity.presentFragment(new WalletActivity(), true));
+                fragment = passcodeActivity;
+            } else {
+                fragment = new WalletActivity();
+            }
         }
         return fragment;
     }
@@ -181,20 +179,12 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
 
     private void handleIntent(Intent intent, boolean isNew, boolean restore, boolean fromPassword) {
         int flags = intent.getFlags();
-        String transferWalletUrl = null;
+        UriParser.Result parsedLink = null;
 
         if ((flags & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0 && intent != null && intent.getAction() != null && !restore && Intent.ACTION_VIEW.equals(intent.getAction())) {
             Uri data = intent.getData();
             if (data != null) {
-                String scheme = data.getScheme();
-                if (scheme != null) {
-                    if ("ton".equals(scheme)) {
-                        String url = data.toString();
-                        if (url.startsWith("ton:transfer") || url.startsWith("ton://transfer")) {
-                            transferWalletUrl = url.replace("ton:transfer", "ton://transfer");
-                        }
-                    }
-                }
+                parsedLink = UriParser.parse(data.toString());
             }
         }
 
@@ -204,14 +194,13 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
             }
         }
 
-        if (transferWalletUrl != null) {
-            UserConfig userConfig = UserConfig.getInstance(currentAccount);
-            if (TextUtils.isEmpty(userConfig.tonEncryptedData)) {
+        if (parsedLink != null) {
+            if (TonController.getInstance(currentAccount).isWalletNotCreated()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle(LocaleController.getString("Wallet", R.string.Wallet));
                 builder.setMessage(LocaleController.getString("WalletTonLinkNoWalletText", R.string.WalletTonLinkNoWalletText));
                 builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), null);
-                builder.setPositiveButton(LocaleController.getString("WalletTonLinkNoWalletCreateWallet", R.string.WalletTonLinkNoWalletCreateWallet), (dialog, which) -> presentFragment(new WalletCreateActivity(WalletCreateActivity.TYPE_CREATE)));
+                builder.setPositiveButton(LocaleController.getString("WalletTonLinkNoWalletCreateWallet", R.string.WalletTonLinkNoWalletCreateWallet), (dialog, which) -> presentFragment(new WalletCreateStartActivity()));
                 builder.show();
             } else if (!actionBarLayout.fragmentsStack.isEmpty()) {
                 if (actionBarLayout.fragmentsStack.size() > 1) {
@@ -224,7 +213,7 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
                 BaseFragment fragment = actionBarLayout.fragmentsStack.get(0);
                 if (fragment instanceof WalletActivity) {
                     WalletActivity walletActivity = (WalletActivity) fragment;
-                    walletActivity.openTransfer(transferWalletUrl, null);
+                    walletActivity.onParseQrCode(parsedLink);
                 }
             }
         }

@@ -27,24 +27,26 @@ public class TextInfoPrivacyCell extends FrameLayout {
 
     private TextView textView;
     private String linkTextColorKey = Theme.key_windowBackgroundWhiteLinkText;
+    private int topPadding = 10;
     private int bottomPadding = 17;
     private int fixedSize;
 
     public TextInfoPrivacyCell(Context context) {
-        this(context, 21);
+        this(context, 20, 10, 17);
     }
 
-    public TextInfoPrivacyCell(Context context, int padding) {
+    public TextInfoPrivacyCell(Context context, int leftRightPadding, int topPadding, int bottomPadding) {
         super(context);
 
         textView = new TextView(context);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+        textView.setLineSpacing(AndroidUtilities.dp(3), 1);
         textView.setGravity(LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT);
-        textView.setPadding(0, AndroidUtilities.dp(10), 0, AndroidUtilities.dp(17));
+        textView.setPadding(0, AndroidUtilities.dp(this.topPadding = topPadding), 0, AndroidUtilities.dp(this.bottomPadding = bottomPadding));
         textView.setMovementMethod(LinkMovementMethod.getInstance());
-        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText4));
+        textView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText6));
         textView.setLinkTextColor(Theme.getColor(linkTextColorKey));
-        addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, padding, 0, padding, 0));
+        addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, leftRightPadding, 0, leftRightPadding, 0));
     }
 
     public void setLinkTextColorKey(String key) {
@@ -72,7 +74,7 @@ public class TextInfoPrivacyCell extends FrameLayout {
         if (text == null) {
             textView.setPadding(0, AndroidUtilities.dp(2), 0, 0);
         } else {
-            textView.setPadding(0, AndroidUtilities.dp(10), 0, AndroidUtilities.dp(bottomPadding));
+            textView.setPadding(0, AndroidUtilities.dp(topPadding), 0, AndroidUtilities.dp(bottomPadding));
         }
         textView.setText(text);
     }

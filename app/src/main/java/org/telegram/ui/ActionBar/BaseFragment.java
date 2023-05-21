@@ -20,17 +20,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 
+import org.TonController.AccountsStateManager;
+import org.TonController.TonConnect.TonConnectController;
+import org.TonController.TonController;
 import org.telegram.messenger.AccountInstance;
-import org.telegram.messenger.NotificationCenter;
-import org.telegram.messenger.TonController;
+import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
-import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.LocaleController;
+import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
+import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.ui.Components.AlertsCreator;
+import org.telegram.ui.Components.BiometricPromtHelper;
+import org.UI.Fragments.CameraScanActivity;
+import org.UI.Fragments.Passcode.PasscodeActivity;
+import org.Utils.Callbacks;
+
+import java.util.ArrayList;
+
+import drinkless.org.ton.TonApi;
 
 public class BaseFragment {
 
-    protected int currentAccount = UserConfig.selectedAccount;
+    protected int currentAccount = Utilities.selectedAccount;
 
     private static int lastClassGuid = 0;
 
@@ -186,6 +200,10 @@ public class BaseFragment {
     }
 
     public void finishFragment(boolean animated) {
+        if (onSheetDismissDelegate != null) {
+            onSheetDismissDelegate.run();
+            return;
+        }
         if (isFinished || parentLayout == null) {
             return;
         }
@@ -194,6 +212,10 @@ public class BaseFragment {
     }
 
     public void removeSelfFromStack() {
+        if (onSheetDismissDelegate != null) {
+            onSheetDismissDelegate.run();
+            return;
+        }
         if (isFinished || parentLayout == null) {
             return;
         }
@@ -221,20 +243,49 @@ public class BaseFragment {
 
     public void onResume() {
         isPaused = false;
+        if (visibleDialog instanceof BottomSheet) {
+            ((BottomSheet) visibleDialog).onParentFragmentResume();
+        }
+        if (cameraScanLayout != null && cameraScanLayout.length != 0) {
+            if (cameraScanLayout[cameraScanLayout.length - 1] != null) {
+                cameraScanLayout[cameraScanLayout.length - 1].onResume();
+            }
+        }
+        if (progressShowCounter > 0 && progressDialog == null) {
+            progressDialog = new AlertDialog(getParentActivity(), 3);
+            progressDialog.setCanCacnel(false);
+            progressDialog.show();
+        }
     }
 
     public void onPause() {
         if (actionBar != null) {
             actionBar.onPause();
         }
+        if (biometricPromtHelper != null) {
+            biometricPromtHelper.onPause();
+        }
+        if (cameraScanLayout != null && cameraScanLayout.length != 0) {
+            if (cameraScanLayout[cameraScanLayout.length - 1] != null) {
+                cameraScanLayout[cameraScanLayout.length - 1].onPause();
+            }
+        }
         isPaused = true;
         try {
-            if (visibleDialog != null && visibleDialog.isShowing() && dismissDialogOnPause(visibleDialog)) {
-                visibleDialog.dismiss();
-                visibleDialog = null;
+            if (visibleDialog != null && visibleDialog.isShowing()) {
+                if (dismissDialogOnPause(visibleDialog)) {
+                    visibleDialog.dismiss();
+                    visibleDialog = null;
+                } else if (visibleDialog instanceof BottomSheet) {
+                    ((BottomSheet) visibleDialog).onParentFragmentPause();
+                }
             }
         } catch (Exception e) {
             FileLog.e(e);
+        }
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
         }
     }
 
@@ -254,11 +305,15 @@ public class BaseFragment {
     }
 
     public void onActivityResultFragment(int requestCode, int resultCode, Intent data) {
-
+        if (cameraScanLayout != null && cameraScanLayout[0] != null) {
+            cameraScanLayout[0].fragmentsStack.get(0).onActivityResultFragment(requestCode, resultCode, data);
+        }
     }
 
     public void onRequestPermissionsResultFragment(int requestCode, String[] permissions, int[] grantResults) {
-
+        if (cameraScanLayout != null && cameraScanLayout[0] != null) {
+            cameraScanLayout[0].fragmentsStack.get(0).onRequestPermissionsResultFragment(requestCode, permissions, grantResults);
+        }
     }
 
     public void saveSelfArgs(Bundle args) {
@@ -399,8 +454,10 @@ public class BaseFragment {
                 if (onDismissListener != null) {
                     onDismissListener.onDismiss(dialog1);
                 }
-                onDialogDismiss(visibleDialog);
-                visibleDialog = null;
+                onDialogDismiss(dialog);
+                if (dialog == visibleDialog) {
+                    visibleDialog = null;
+                }
             });
             visibleDialog.show();
             return visibleDialog;
@@ -442,11 +499,162 @@ public class BaseFragment {
         return getAccountInstance().getTonController();
     }
 
-    public UserConfig getUserConfig() {
-        return getAccountInstance().getUserConfig();
+    public TonConnectController getTonConnectController() {
+        return getAccountInstance().getTonController().getTonConnectController();
+    }
+
+    public AccountsStateManager getTonAccountStateManager () {
+        return getAccountInstance().getTonController().getAccountsStateManager();
     }
 
     public NotificationCenter getNotificationCenter() {
         return getAccountInstance().getNotificationCenter();
+    }
+
+    /**/
+
+    public void defaultErrorCallback (String text, TonApi.Error error) {
+        AndroidUtilities.runOnUIThread(() -> {
+            AlertsCreator.showSimpleAlert(this, LocaleController.getString("Wallet", R.string.Wallet), LocaleController.getString("ErrorOccurred", R.string.ErrorOccurred) + "\n" + (error != null ? error.message : text));
+        });
+    }
+
+
+
+    /**/
+
+    private ActionBarLayout[] cameraScanLayout;
+
+    public void openQrCodeReader (Callbacks.StringCallback callback) {
+        CameraScanActivity cameraScanActivity = new CameraScanActivity();
+        cameraScanActivity.setDelegate(callback);
+        cameraScanLayout = showAsSheet(cameraScanActivity);
+    }
+
+
+
+    /**/
+
+    private BiometricPromtHelper biometricPromtHelper;
+
+    public BiometricPromtHelper getBiometricPromtHelper() {
+        if (biometricPromtHelper == null) {
+            biometricPromtHelper = new BiometricPromtHelper(this);
+        }
+        return biometricPromtHelper;
+    }
+
+    public void requestPasscodeOrBiometricAuth (String text, Callbacks.AuthCallback callback) {
+        switch (getTonController().getKeyProtectionType()) {
+            case TonController.KEY_PROTECTION_TYPE_BIOMETRIC: {
+                getBiometricPromtHelper().promtWithCipher(getTonController().getCipherForDecrypt(), text, cipher ->
+                    callback.run(new TonController.UserAuthInfo(null, cipher, null))
+                );
+                break;
+            }
+            case TonController.KEY_PROTECTION_TYPE_NONE: {
+                PasscodeActivity passcodeActivity = new PasscodeActivity();
+                passcodeActivity.setOnSuccessPasscodeDelegate(passcode -> {
+                    callback.run(new TonController.UserAuthInfo(passcode, null, null));
+                    passcodeActivity.finishFragment(true);
+                });
+                showAsSheet(passcodeActivity);
+                break;
+            }
+        }
+    }
+
+    public void requestPasscodeActivity (Callbacks.StringCallback callback, boolean needCloseAfterSuccess) {
+        PasscodeActivity passcodeActivity = new PasscodeActivity();
+        passcodeActivity.setOnSuccessPasscodeDelegate(passcode -> {
+            callback.run(passcode);
+            if (needCloseAfterSuccess) {
+                passcodeActivity.finishFragment(true);
+            }
+        });
+        presentFragment(passcodeActivity);
+    }
+
+
+    /**/
+
+    private Runnable onSheetDismissDelegate;
+
+    private void setOnSheetDismissDelegate(Runnable onSheetDismissDelegate) {
+        this.onSheetDismissDelegate = onSheetDismissDelegate;
+    }
+
+    public ActionBarLayout[] showAsSheet (BaseFragment fragment) {
+        Context context = getParentActivity();
+        if (context == null) {
+            return null;
+        }
+
+        ActionBarLayout[] actionBarLayout = new ActionBarLayout[]{new ActionBarLayout(context)};
+        BottomSheet bottomSheet = new BottomSheet(this, false) {
+            {
+                fragment.setOnSheetDismissDelegate(this::dismiss);
+                actionBarLayout[0].init(new ArrayList<>());
+                actionBarLayout[0].addFragmentToStack(fragment);
+                actionBarLayout[0].showLastFragment();
+                actionBarLayout[0].setPadding(backgroundPaddingLeft, 0, backgroundPaddingLeft, 0);
+                containerView = actionBarLayout[0];
+                setApplyBottomPadding(false);
+                setOnDismissListener(dialog -> fragment.onFragmentDestroy());
+            }
+
+            @Override
+            protected boolean canDismissWithSwipe() {
+                return false;
+            }
+
+            @Override
+            public void onBackPressed() {
+                if (actionBarLayout[0] == null || actionBarLayout[0].fragmentsStack.size() <= 1) {
+                    super.onBackPressed();
+                } else {
+                    actionBarLayout[0].onBackPressed();
+                }
+            }
+
+            @Override
+            public void dismiss() {
+                super.dismiss();
+                actionBarLayout[0] = null;
+            }
+        };
+
+        bottomSheet.show();
+        return actionBarLayout;
+    }
+
+
+
+
+
+
+    private AlertDialog progressDialog;
+    private int progressShowCounter = 0;
+
+    protected void showProgressDialog () {
+        progressShowCounter += 1;
+        if (progressShowCounter > 1) return;
+
+        progressDialog = new AlertDialog(getParentActivity(), 3);
+        progressDialog.setCanCacnel(false);
+        progressDialog.show();
+    }
+
+    protected void hideProgressDialog () {
+        progressShowCounter -= 1;
+        if (progressShowCounter < 0) {
+            progressShowCounter = 0;
+        }
+        if (progressShowCounter != 0) return;
+
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
     }
 }

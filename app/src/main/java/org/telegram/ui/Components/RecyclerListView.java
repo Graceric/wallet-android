@@ -33,17 +33,18 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.LocaleController;
 import org.telegram.ui.ActionBar.Theme;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class RecyclerListView extends RecyclerView {
 
@@ -148,7 +149,7 @@ public class RecyclerListView extends RecyclerView {
         int run();
     }
 
-    public abstract static class SectionsAdapter extends FastScrollAdapter {
+    public abstract static class SectionsAdapter extends SelectionAdapter {
 
         private SparseIntArray sectionPositionCache;
         private SparseIntArray sectionCache;
@@ -177,6 +178,24 @@ public class RecyclerListView extends RecyclerView {
         public SectionsAdapter() {
             super();
             cleanupCache();
+        }
+
+        @Override
+        public void notifyItemChanged (int position) {
+            cleanupCache();
+            super.notifyItemChanged(position);
+        }
+
+        @Override
+        public void notifyItemRangeRemoved (int positionStart, int itemCount) {
+            cleanupCache();
+            super.notifyItemRangeRemoved(positionStart, itemCount);
+        }
+
+        @Override
+        public void notifyItemRangeInserted (int positionStart, int itemCount) {
+            cleanupCache();
+            super.notifyItemRangeInserted(positionStart, itemCount);
         }
 
         @Override
@@ -278,6 +297,10 @@ public class RecyclerListView extends RecyclerView {
         public abstract Object getItem(int section, int position);
         public abstract void onBindViewHolder(int section, int position, ViewHolder holder);
         public abstract View getSectionHeaderView(int section, View view);
+    }
+
+    public @Nullable Path getClipHeaderPath() {
+        return null;
     }
 
     public static class Holder extends ViewHolder {
@@ -1588,6 +1611,12 @@ public class RecyclerListView extends RecyclerView {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
+        Path clipPath = getClipHeaderPath();
+
+        if (clipPath != null) {
+            canvas.save();
+            canvas.clipPath(clipPath);
+        }
         if (!selectorRect.isEmpty()) {
             selectorDrawable.setBounds(selectorRect);
             selectorDrawable.draw(canvas);
@@ -1635,6 +1664,9 @@ public class RecyclerListView extends RecyclerView {
                 pinnedHeader.draw(canvas);
                 canvas.restoreToCount(saveCount);
             }
+        }
+        if (clipPath != null) {
+            canvas.restore();
         }
     }
 

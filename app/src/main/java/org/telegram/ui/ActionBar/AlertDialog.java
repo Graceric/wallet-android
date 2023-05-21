@@ -393,13 +393,12 @@ public class AlertDialog extends Dialog implements Drawable.Callback {
             titleContainer = new FrameLayout(getContext());
             containerView.addView(titleContainer, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, 24, 0, 24, 0));
 
-            titleTextView = new TextView(getContext());
+            titleTextView = LayoutHelper.createTextView(getContext(), 19, 26);
             titleTextView.setText(title);
             titleTextView.setTextColor(getThemeColor(Theme.key_dialogTextBlack));
-            titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
             titleTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
             titleTextView.setGravity((LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP);
-            titleContainer.addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 0, 19, 0, (subtitle != null ? 2 : (items != null ? 14 : 10))));
+            titleContainer.addView(titleTextView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.TOP, 0, 22, 0, (subtitle != null ? 2 : (items != null ? 16 : 12))));
         }
 
         if (secondTitle != null && title != null) {
@@ -452,9 +451,8 @@ public class AlertDialog extends Dialog implements Drawable.Callback {
             contentScrollView.addView(scrollContainer, new ScrollView.LayoutParams(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
         }
 
-        messageTextView = new TextView(getContext());
+        messageTextView = LayoutHelper.createTextView(getContext(), 15, 20);
         messageTextView.setTextColor(getThemeColor(Theme.key_dialogTextBlack));
-        messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
         messageTextView.setMovementMethod(new AndroidUtilities.LinkMovementMethodMy());
         messageTextView.setLinkTextColor(getThemeColor(Theme.key_dialogTextLink));
         if (!messageTextViewClickable) {
@@ -559,13 +557,13 @@ public class AlertDialog extends Dialog implements Drawable.Callback {
                                 if (LocaleController.isRTL) {
                                     int x = getPaddingLeft();
                                     if (positiveButton != null) {
-                                        x += positiveButton.getMeasuredWidth() + AndroidUtilities.dp(8);
+                                        x += positiveButton.getMeasuredWidth();
                                     }
                                     child.layout(x, getPaddingTop(), x + child.getMeasuredWidth(), getPaddingTop() + child.getMeasuredHeight());
                                 } else {
                                     int x = width - getPaddingRight() - child.getMeasuredWidth();
                                     if (positiveButton != null) {
-                                        x -= positiveButton.getMeasuredWidth() + AndroidUtilities.dp(8);
+                                        x -= positiveButton.getMeasuredWidth();
                                     }
                                     child.layout(x, getPaddingTop(), x + child.getMeasuredWidth(), getPaddingTop() + child.getMeasuredHeight());
                                 }
@@ -618,7 +616,7 @@ public class AlertDialog extends Dialog implements Drawable.Callback {
                     }
                 }
             };
-            buttonsLayout.setPadding(AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8));
+            buttonsLayout.setPadding(AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(8), AndroidUtilities.dp(12));
             containerView.addView(buttonsLayout, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, 52));
 
             if (positiveButtonText != null) {
@@ -638,15 +636,15 @@ public class AlertDialog extends Dialog implements Drawable.Callback {
                 textView.setMinWidth(AndroidUtilities.dp(64));
                 textView.setTag(Dialog.BUTTON_POSITIVE);
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-                textView.setTextColor(getThemeColor(Theme.key_dialogButton));
+                textView.setTextColor(getThemeColor(Theme.key_wallet_defaultLinkTextColor));
                 textView.setGravity(Gravity.CENTER);
                 textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
 //                textView.setLines(1);
 //                textView.setSingleLine(true); //TODO
-                textView.setText(positiveButtonText.toString().toUpperCase());
-                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(getThemeColor(Theme.key_dialogButton)));
-                textView.setPadding(AndroidUtilities.dp(10), 0, AndroidUtilities.dp(10), 0);
-                buttonsLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 36, Gravity.TOP | Gravity.RIGHT));
+                textView.setText(positiveButtonText.toString());
+                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(getThemeColor(Theme.key_wallet_defaultLinkTextColor), 8));
+                textView.setPadding(AndroidUtilities.dp(20), 0, AndroidUtilities.dp(20), 0);
+                buttonsLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 42, Gravity.TOP | Gravity.RIGHT));
                 textView.setOnClickListener(v -> {
                     if (positiveButtonListener != null) {
                         positiveButtonListener.onClick(AlertDialog.this, Dialog.BUTTON_POSITIVE);
@@ -674,15 +672,15 @@ public class AlertDialog extends Dialog implements Drawable.Callback {
                 textView.setMinWidth(AndroidUtilities.dp(64));
                 textView.setTag(Dialog.BUTTON_NEGATIVE);
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-                textView.setTextColor(getThemeColor(Theme.key_dialogButton));
+                textView.setTextColor(getThemeColor(Theme.key_wallet_defaultLinkTextColor));
                 textView.setGravity(Gravity.CENTER);
                 textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
                 textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setSingleLine(true);
-                textView.setText(negativeButtonText.toString().toUpperCase());
-                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(getThemeColor(Theme.key_dialogButton)));
-                textView.setPadding(AndroidUtilities.dp(10), 0, AndroidUtilities.dp(10), 0);
-                buttonsLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 36, Gravity.TOP | Gravity.RIGHT));
+                textView.setText(negativeButtonText.toString());
+                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(getThemeColor(Theme.key_wallet_defaultLinkTextColor), 8));
+                textView.setPadding(AndroidUtilities.dp(20), 0, AndroidUtilities.dp(20), 0);
+                buttonsLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 42, Gravity.TOP | Gravity.RIGHT));
                 textView.setOnClickListener(v -> {
                     if (negativeButtonListener != null) {
                         negativeButtonListener.onClick(AlertDialog.this, Dialog.BUTTON_NEGATIVE);
@@ -710,15 +708,15 @@ public class AlertDialog extends Dialog implements Drawable.Callback {
                 textView.setMinWidth(AndroidUtilities.dp(64));
                 textView.setTag(Dialog.BUTTON_NEUTRAL);
                 textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
-                textView.setTextColor(getThemeColor(Theme.key_dialogButton));
+                textView.setTextColor(getThemeColor(Theme.key_wallet_defaultLinkTextColor));
                 textView.setGravity(Gravity.CENTER);
                 textView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
                 textView.setEllipsize(TextUtils.TruncateAt.END);
                 textView.setSingleLine(true);
-                textView.setText(neutralButtonText.toString().toUpperCase());
-                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(getThemeColor(Theme.key_dialogButton)));
-                textView.setPadding(AndroidUtilities.dp(10), 0, AndroidUtilities.dp(10), 0);
-                buttonsLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 36, Gravity.TOP | Gravity.LEFT));
+                textView.setText(neutralButtonText.toString());
+                textView.setBackgroundDrawable(Theme.getRoundRectSelectorDrawable(getThemeColor(Theme.key_wallet_defaultLinkTextColor), 8));
+                textView.setPadding(AndroidUtilities.dp(20), 0, AndroidUtilities.dp(20), 0);
+                buttonsLayout.addView(textView, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 42, Gravity.TOP | Gravity.LEFT));
                 textView.setOnClickListener(v -> {
                     if (neutralButtonListener != null) {
                         neutralButtonListener.onClick(AlertDialog.this, Dialog.BUTTON_NEGATIVE);

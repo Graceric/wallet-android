@@ -107,6 +107,7 @@ public class ActionBarMenuItem extends FrameLayout {
     private int additionalXOffset;
     private boolean longClickEnabled = true;
     private boolean animateClear = true;
+    private float transitionOffset;
 
     public ActionBarMenuItem(Context context, ActionBarMenu menu, int backgroundColor, int iconColor) {
         this(context, menu, backgroundColor, iconColor, false);
@@ -970,5 +971,15 @@ public class ActionBarMenuItem extends FrameLayout {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName("android.widget.ImageButton");
+    }
+
+    @Override
+    public void setTranslationX(float translationX) {
+        super.setTranslationX(translationX + transitionOffset);
+    }
+
+    public void setTransitionOffset(float offset) {
+        this.transitionOffset = offset;
+        setTranslationX(0);
     }
 }

@@ -7,12 +7,13 @@
 
 package org.telegram.messenger;
 
+import org.TonController.TonController;
 import org.telegram.tgnet.ConnectionsManager;
 
 public class AccountInstance {
 
     private int currentAccount;
-    private static volatile AccountInstance[] Instance = new AccountInstance[UserConfig.MAX_ACCOUNT_COUNT];
+    private static volatile AccountInstance[] Instance = new AccountInstance[Utilities.MAX_ACCOUNT_COUNT];
     public static AccountInstance getInstance(int num) {
         AccountInstance localInstance = Instance[num];
         if (localInstance == null) {
@@ -36,10 +37,6 @@ public class AccountInstance {
 
     public NotificationCenter getNotificationCenter() {
         return NotificationCenter.getInstance(currentAccount);
-    }
-
-    public UserConfig getUserConfig() {
-        return UserConfig.getInstance(currentAccount);
     }
 
     public TonController getTonController() {

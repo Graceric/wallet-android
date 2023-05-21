@@ -9,13 +9,20 @@ package org.telegram.ui.Components;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import org.TonController.Data.Wallets;
+import org.TonController.TonController;
+import org.telegram.messenger.AndroidUtilities;
+import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
-import org.telegram.messenger.ApplicationLoader;
+import org.telegram.ui.Cells.RadioColorCell;
+import org.Utils.Settings;
 
 public class AlertsCreator {
 
@@ -63,7 +70,89 @@ public class AlertsCreator {
         return dialog;
     }
 
-    public interface AccountSelectDelegate {
-        void didSelectAccount(int account);
+    public static Dialog createWalletTypeSelectDialog(Context context, int currentAccount, Runnable onSelect) {
+        TonController controller = TonController.getInstance(currentAccount);
+        /*HashMap<String, AccountsStateManager.WalletInfo> wallets =
+            controller.getAccountsStateManager().getSupportedWalletsMapWithAddressKey();*/
+
+        final int selected = controller.getCurrentWalletType();
+        String[] descriptions = new String[]{ "Wallet v3R1", "Wallet v3R2", "Wallet v4R2" };
+        String[] addresses = new String[]{
+            controller.getWalletAddressFromType(Wallets.WALLET_TYPE_V3R1),
+            controller.getWalletAddressFromType(Wallets.WALLET_TYPE_V3R2),
+            controller.getWalletAddressFromType(Wallets.WALLET_TYPE_V4R2)
+        };
+
+        final LinearLayout linearLayout = new LinearLayout(context);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        for (int a = 0; a < descriptions.length; a++) {
+            boolean isSelected = (a == 0 && selected == Wallets.WALLET_TYPE_V3R1)
+                || (a == 1 && selected == Wallets.WALLET_TYPE_V3R2)
+                || (a == 2 && selected == Wallets.WALLET_TYPE_V4R2);
+
+            RadioColorCell cell = new RadioColorCell(context);
+            cell.setPadding(AndroidUtilities.dp(4), 0, AndroidUtilities.dp(4), 0);
+            cell.setTag(a);
+            cell.setTextAndText2AndValue(descriptions[a], Utilities.truncateString(addresses[a], 5, 5), isSelected);
+            linearLayout.addView(cell);
+            cell.setOnClickListener(v -> {
+                final int newSelected = (Integer) v.getTag();
+                int toSelect = -1;
+                if (newSelected == 0) {
+                    toSelect = Wallets.WALLET_TYPE_V3R1;
+                } else if (newSelected == 1) {
+                    toSelect = Wallets.WALLET_TYPE_V3R2;
+                } else if (newSelected == 2) {
+                    toSelect = Wallets.WALLET_TYPE_V4R2;
+                }
+                if (toSelect != -1) {
+                    TonController.getInstance(currentAccount).updateWalletAddressAndInfo(toSelect);
+                }
+                builder.getDismissRunnable().run();
+                if (onSelect != null) {
+                    onSelect.run();
+                }
+
+
+            });
+        }
+        builder.setTitle(LocaleController.getString("WalletAddressType", R.string.WalletAddressType));
+        builder.setView(linearLayout);
+        builder.setPositiveButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        return builder.create();
+    }
+
+    public static Dialog createCurrencySelectDialog(Context context, Runnable onSelect) {
+        final String current = Settings.instance().optionShowedCurrency.get();
+        String[] descriptions = new String[]{ "USD", "EUR", "BTC" };
+
+        final LinearLayout linearLayout = new LinearLayout(context);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        for (String description : descriptions) {
+            boolean isSelected = description.equals(current);
+
+            RadioColorCell cell = new RadioColorCell(context);
+            cell.setPadding(AndroidUtilities.dp(4), 0, AndroidUtilities.dp(4), 0);
+            cell.setTag(description);
+            cell.setTextAndValue(description, isSelected);
+            linearLayout.addView(cell);
+            cell.setOnClickListener(v -> {
+                final String newSelected = (String) v.getTag();
+                Settings.instance().optionShowedCurrency.set(newSelected);
+
+                builder.getDismissRunnable().run();
+                if (onSelect != null) {
+                    onSelect.run();
+                }
+            });
+        }
+        builder.setTitle(LocaleController.getString("WalletPrimaryCurrency", R.string.WalletPrimaryCurrency));
+        builder.setView(linearLayout);
+        builder.setPositiveButton(LocaleController.getString("Cancel", R.string.Cancel), null);
+        return builder.create();
     }
 }

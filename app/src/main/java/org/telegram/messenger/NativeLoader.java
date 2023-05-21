@@ -114,6 +114,13 @@ public class NativeLoader {
             return;
         }
 
+        /*try {
+            System.loadLibrary("leveldbjni");
+            Log.i("INIT_NATIVE", "leveldb" + LevelDB.getVersion());
+        } catch (Error e) {
+            FileLog.e(e);
+        }*/
+
         try {
             try {
                 System.loadLibrary(LIB_NAME);

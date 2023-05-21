@@ -17,6 +17,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -40,21 +41,12 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 public class Theme {
-
-    public static final int ACTION_BAR_PHOTO_VIEWER_COLOR = 0x7f000000;
-    public static final int ACTION_BAR_MEDIA_PICKER_COLOR = 0xff333333;
-    public static final int ACTION_BAR_VIDEO_EDIT_COLOR = 0xff000000;
-    public static final int ACTION_BAR_PLAYER_COLOR = 0xffffffff;
-    public static final int ACTION_BAR_PICKER_SELECTOR_COLOR = 0xff3d3d3d;
-    public static final int ACTION_BAR_WHITE_SELECTOR_COLOR = 0x40ffffff;
-    public static final int ACTION_BAR_AUDIO_SELECTOR_COLOR = 0x2f000000;
-    public static final int ARTICLE_VIEWER_MEDIA_PROGRESS_COLOR = 0xffffffff;
-
     private static Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
+    public static Paint checkboxSquare_eraserPaint;
+    public static Paint checkboxSquare_checkPaint;
+    public static Paint checkboxSquare_backgroundPaint;
     public static Paint dividerPaint;
-
-    public static Drawable listSelector;
 
     public static Drawable moveUpDrawable;
 
@@ -70,6 +62,7 @@ public class Theme {
     public static final String key_dialogInputField = "dialogInputField";
     public static final String key_dialogInputFieldActivated = "dialogInputFieldActivated";
     public static final String key_dialogScrollGlow = "dialogScrollGlow";
+
     public static final String key_dialogProgressCircle = "dialogProgressCircle";
     public static final String key_dialogLineProgress = "dialogLineProgress";
     public static final String key_dialogLineProgressBackground = "dialogLineProgressBackground";
@@ -84,6 +77,7 @@ public class Theme {
     public static final String key_windowBackgroundWhite = "windowBackgroundWhite";
     public static final String key_progressCircle = "progressCircle";
     public static final String key_listSelector = "listSelectorSDK21";
+    public static final String key_listSelectorWhite = "listSelectorSDK21White";
     public static final String key_windowBackgroundWhiteInputField = "windowBackgroundWhiteInputField";
     public static final String key_windowBackgroundWhiteInputFieldActivated = "windowBackgroundWhiteInputFieldActivated";
     public static final String key_windowBackgroundWhiteGrayIcon = "windowBackgroundWhiteGrayIcon";
@@ -97,8 +91,10 @@ public class Theme {
     public static final String key_windowBackgroundWhiteGrayText4 = "windowBackgroundWhiteGrayText4";
     public static final String key_windowBackgroundWhiteGrayText6 = "windowBackgroundWhiteGrayText6";
     public static final String key_windowBackgroundWhiteGrayText7 = "windowBackgroundWhiteGrayText7";
+    public static final String key_windowBackgroundWhiteGrayText8 = "windowBackgroundWhiteGrayText8";
 
     public static final String key_windowBackgroundWhiteBlackText = "windowBackgroundWhiteBlackText";
+    public static final String key_windowBackgroundWhiteBlackText2 = "windowBackgroundWhiteBlackText2";
     public static final String key_windowBackgroundWhiteHintText = "windowBackgroundWhiteHintText";
     public static final String key_windowBackgroundWhiteValueText = "windowBackgroundWhiteValueText";
     public static final String key_windowBackgroundWhiteLinkText = "windowBackgroundWhiteLinkText";
@@ -146,7 +142,6 @@ public class Theme {
     public static final String key_wallet_whiteBackground = "wallet_whiteBackground";
     public static final String key_wallet_blackBackgroundSelector = "wallet_blackBackgroundSelector";
     public static final String key_wallet_whiteText = "wallet_whiteText";
-    public static final String key_wallet_blackText = "wallet_blackText";
     public static final String key_wallet_statusText = "wallet_statusText";
     public static final String key_wallet_grayText = "wallet_grayText";
     public static final String key_wallet_grayText2 = "wallet_grayText2";
@@ -165,10 +160,48 @@ public class Theme {
 
     private static float[] hsv = new float[3];
 
+    public static final String key_wallet_headerBlackText = "wallet_headerBlackText";
+    public static final String key_wallet_blackText = "wallet_blackText";
+
+    public static final String key_wallet_transactionCommentBackground = "wallet_transactionCommentBackground";
+    public static final String key_wallet_transactionCommentIcon = "wallet_transactionCommentIcon";
+
+    public static final String key_wallet_defaultTonBlue = "wallet_defaultTonBlue";
+    public static final String key_wallet_buttonTonBluePressed = "wallet_buttonTonBluePressed";
+
+    public static final String key_wallet_defaultLinkTextColor = "wallet_defaultLinkTextColor";
+
+    public static final String key_wallet_warningTextColor = "wallet_warningTextColor";
+    public static final String key_wallet_errorTextColor = "wallet_errorTextColor";
+    public static final String key_wallet_errorAmountInputTextColor = "wallet_errorAmountInputTextColor";
+
+    public static final String key_wallet_loadingBackgroundColor = "wallet_loadingBackgroundColor";
+    public static final String key_tooltip_backgroundColor = "tooltip_backgroundColor";
+
+    static {
+        defaultColors.put(key_wallet_defaultTonBlue, 0xFF339CEC);
+        defaultColors.put(key_wallet_buttonTonBluePressed, 0xFF339CEC);
+
+        defaultColors.put(key_wallet_warningTextColor, 0xFFFE9330);
+        defaultColors.put(key_wallet_errorTextColor, 0xFFFE483D);
+        defaultColors.put(key_wallet_errorAmountInputTextColor, 0xFFFE3C30);
+
+        defaultColors.put(key_wallet_defaultLinkTextColor, 0xFF1A81CF);
+
+        defaultColors.put(key_tooltip_backgroundColor, 0xEA2f373f);
+        defaultColors.put(key_wallet_loadingBackgroundColor, 0xFFCCCCCC);
+
+        defaultColors.put(key_wallet_blackText, 0xff000000);
+        defaultColors.put(key_wallet_headerBlackText, 0xff222222);
+
+        defaultColors.put(key_wallet_transactionCommentBackground, 0xFFF1F1F4);
+        defaultColors.put(key_wallet_transactionCommentIcon, 0xFF444444);
+    }
+
     static {
         defaultColors.put(key_dialogBackground, 0xffffffff);
         defaultColors.put(key_dialogBackgroundGray, 0xfff0f0f0);
-        defaultColors.put(key_dialogTextBlack, 0xff222222);
+        defaultColors.put(key_dialogTextBlack, 0xff000000);
         defaultColors.put(key_dialogTextLink, 0xff2678b6);
         defaultColors.put(key_dialogTextRed2, 0xffde3a3a);
         defaultColors.put(key_dialogTextBlue2, 0xff3a95d5);
@@ -188,6 +221,7 @@ public class Theme {
         defaultColors.put(key_dialog_inlineProgress, 0xff6b7378);
         defaultColors.put(key_dialogShadowLine, 0x12000000);
 
+
         defaultColors.put(key_windowBackgroundWhite, 0xffffffff);
         defaultColors.put(key_progressCircle, 0xff527da3);
         defaultColors.put(key_windowBackgroundWhiteGrayIcon, 0xff81868b);
@@ -200,7 +234,9 @@ public class Theme {
         defaultColors.put(key_windowBackgroundWhiteGrayText4, 0xff808080);
         defaultColors.put(key_windowBackgroundWhiteGrayText6, 0xff757575);
         defaultColors.put(key_windowBackgroundWhiteGrayText7, 0xffc6c6c6);
+        defaultColors.put(key_windowBackgroundWhiteGrayText8, 0xff444444);
         defaultColors.put(key_windowBackgroundWhiteBlackText, 0xff222222);
+        defaultColors.put(key_windowBackgroundWhiteBlackText2, 0xff000000);
         defaultColors.put(key_windowBackgroundWhiteHintText, 0xffa8a8a8);
         defaultColors.put(key_windowBackgroundWhiteValueText, 0xff3a95d5);
         defaultColors.put(key_windowBackgroundWhiteLinkText, 0xff2678b6);
@@ -208,6 +244,7 @@ public class Theme {
         defaultColors.put(key_windowBackgroundWhiteInputField, 0xffdbdbdb);
         defaultColors.put(key_windowBackgroundWhiteInputFieldActivated, 0xff37a9f0);
         defaultColors.put(key_listSelector, 0x0f000000);
+        defaultColors.put(key_listSelectorWhite, 0x0fffffff);
         defaultColors.put(key_windowBackgroundGray, 0xfff0f0f0);
         defaultColors.put(key_windowBackgroundGrayShadow, 0xff000000);
         defaultColors.put(key_divider, 0xffd9d9d9);
@@ -251,18 +288,16 @@ public class Theme {
         defaultColors.put(key_wallet_whiteBackground, 0xffffffff);
         defaultColors.put(key_wallet_blackBackgroundSelector, 0x40ffffff);
         defaultColors.put(key_wallet_whiteText, 0xffffffff);
-        defaultColors.put(key_wallet_blackText, 0xff222222);
         defaultColors.put(key_wallet_statusText, 0xff808080);
         defaultColors.put(key_wallet_grayText, 0xff777777);
         defaultColors.put(key_wallet_grayText2, 0xff666666);
-        defaultColors.put(key_wallet_greenText, 0xff37a818);
-        defaultColors.put(key_wallet_redText, 0xffdb4040);
+        defaultColors.put(key_wallet_greenText, 0xff37A818);
+        defaultColors.put(key_wallet_redText, 0xffFE3C30);
         defaultColors.put(key_wallet_dateText, 0xff999999);
         defaultColors.put(key_wallet_commentText, 0xff999999);
         defaultColors.put(key_wallet_releaseBackground, 0xff307cbb);
         defaultColors.put(key_wallet_pullBackground, 0xff212121);
-        defaultColors.put(key_wallet_buttonBackground, 0xff47a1e6);
-        defaultColors.put(key_wallet_buttonPressedBackground, 0xff2b8cd6);
+        defaultColors.put(key_wallet_buttonPressedBackground, 0xff439bde);
         defaultColors.put(key_wallet_buttonText, 0xffffffff);
         defaultColors.put(key_wallet_addressConfirmBackground, 0x0d000000);
     }
@@ -491,6 +526,12 @@ public class Theme {
         return defaultDrawable;
     }
 
+    public static Drawable createRoundRectDrawable(int rad1, int rad2, int rad3, int rad4, int defaultColor) {
+        ShapeDrawable defaultDrawable = new ShapeDrawable(new RoundRectShape(new float[]{rad1, rad1, rad2, rad2, rad3, rad3, rad4, rad4}, null, null));
+        defaultDrawable.getPaint().setColor(defaultColor);
+        return defaultDrawable;
+    }
+
     public static Drawable createSimpleSelectorRoundRectDrawable(int rad, int defaultColor, int pressedColor) {
         ShapeDrawable defaultDrawable = new ShapeDrawable(new RoundRectShape(new float[]{rad, rad, rad, rad, rad, rad, rad, rad}, null, null));
         defaultDrawable.getPaint().setColor(defaultColor);
@@ -520,17 +561,21 @@ public class Theme {
     }
 
     public static Drawable getRoundRectSelectorDrawable(int color) {
+        return getRoundRectSelectorDrawable(color, 3);
+    }
+
+    public static Drawable getRoundRectSelectorDrawable(int color, int radDp) {
         if (Build.VERSION.SDK_INT >= 21) {
-            Drawable maskDrawable = createRoundRectDrawable(AndroidUtilities.dp(3), 0xffffffff);
+            Drawable maskDrawable = createRoundRectDrawable(AndroidUtilities.dp(radDp), 0xffffffff);
             ColorStateList colorStateList = new ColorStateList(
-                    new int[][]{StateSet.WILD_CARD},
-                    new int[]{(color & 0x00ffffff) | 0x19000000}
+                new int[][]{StateSet.WILD_CARD},
+                new int[]{(color & 0x00ffffff) | 0x19000000}
             );
             return new RippleDrawable(colorStateList, null, maskDrawable);
         } else {
             StateListDrawable stateListDrawable = new StateListDrawable();
-            stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, createRoundRectDrawable(AndroidUtilities.dp(3), (color & 0x00ffffff) | 0x19000000));
-            stateListDrawable.addState(new int[]{android.R.attr.state_selected}, createRoundRectDrawable(AndroidUtilities.dp(3), (color & 0x00ffffff) | 0x19000000));
+            stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, createRoundRectDrawable(AndroidUtilities.dp(radDp), (color & 0x00ffffff) | 0x19000000));
+            stateListDrawable.addState(new int[]{android.R.attr.state_selected}, createRoundRectDrawable(AndroidUtilities.dp(radDp), (color & 0x00ffffff) | 0x19000000));
             stateListDrawable.addState(StateSet.WILD_CARD, new ColorDrawable(0x00000000));
             return stateListDrawable;
         }
@@ -664,6 +709,15 @@ public class Theme {
         if (dividerPaint == null) {
             dividerPaint = new Paint();
             dividerPaint.setStrokeWidth(1);
+
+            checkboxSquare_checkPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            checkboxSquare_checkPaint.setStyle(Paint.Style.STROKE);
+            checkboxSquare_checkPaint.setStrokeWidth(AndroidUtilities.dp(2));
+            checkboxSquare_checkPaint.setStrokeCap(Paint.Cap.ROUND);
+            checkboxSquare_eraserPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            checkboxSquare_eraserPaint.setColor(0);
+            checkboxSquare_eraserPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+            checkboxSquare_backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
             applyCommonTheme();
         }

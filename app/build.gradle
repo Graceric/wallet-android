@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'module-plugin'
+apply plugin: 'com.google.gms.google-services'
 
 repositories {
     mavenCentral()
@@ -16,10 +18,21 @@ dependencies {
     implementation 'androidx.exifinterface:exifinterface:1.2.0'
 
     implementation 'com.google.android.gms:play-services-vision:16.2.0'
+
+    implementation 'org.purejava:tweetnacl-java:1.1.2'
+    implementation 'com.google.firebase:firebase-messaging:23.1.2'
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.10")
+
+    implementation(project(":neodiX42:ton4j:utils"))
+    implementation(project(":neodiX42:ton4j:address"))
+    implementation(project(":neodiX42:ton4j:bitstring"))
+    implementation(project(":neodiX42:ton4j:cell"))
+    implementation(project(":vkryl:core"))
+    implementation(project(":vkryl:android"))
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 33
     buildToolsVersion '30.0.3'
     ndkVersion "20.0.5594570"
 
@@ -165,8 +178,7 @@ android {
         variant.outputs.all { output ->
             output.getProcessManifestProvider().get().doLast {
                 def abiVersion = variant.productFlavors.get(0).abiVersionCode
-
-                def outputDir = manifestOutputDirectory
+                def outputDir = multiApkManifestOutputDirectory
                 File directory
                 if (outputDir instanceof File) {
                     directory = outputDir
@@ -191,8 +203,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 18
-        targetSdkVersion 30
+        minSdkVersion 19
+        targetSdkVersion 33
         versionName "1.0.6"
 
         vectorDrawables.generatedDensities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi']

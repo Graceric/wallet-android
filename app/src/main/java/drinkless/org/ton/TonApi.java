@@ -150,60 +150,6 @@ public class TonApi {
         }
     }
 
-    public static class TestWalletAccountState extends AccountState {
-        public int seqno;
-
-        /**
-         *
-         */
-        public TestWalletAccountState() {
-        }
-
-        public TestWalletAccountState(int seqno) {
-            this.seqno = seqno;
-        }
-
-        /**
-         * Identifier uniquely determining type of the object.
-         */
-        public static final int CONSTRUCTOR = -2053909931;
-
-        /**
-         * @return this.CONSTRUCTOR
-         */
-        @Override
-        public int getConstructor() {
-            return CONSTRUCTOR;
-        }
-    }
-
-    public static class WalletAccountState extends AccountState {
-        public int seqno;
-
-        /**
-         *
-         */
-        public WalletAccountState() {
-        }
-
-        public WalletAccountState(int seqno) {
-            this.seqno = seqno;
-        }
-
-        /**
-         * Identifier uniquely determining type of the object.
-         */
-        public static final int CONSTRUCTOR = -390017192;
-
-        /**
-         * @return this.CONSTRUCTOR
-         */
-        @Override
-        public int getConstructor() {
-            return CONSTRUCTOR;
-        }
-    }
-
     public static class WalletV3AccountState extends AccountState {
         public long walletId;
         public int seqno;
@@ -279,33 +225,6 @@ public class TonApi {
          * Identifier uniquely determining type of the object.
          */
         public static final int CONSTRUCTOR = -1803723441;
-
-        /**
-         * @return this.CONSTRUCTOR
-         */
-        @Override
-        public int getConstructor() {
-            return CONSTRUCTOR;
-        }
-    }
-
-    public static class TestGiverAccountState extends AccountState {
-        public int seqno;
-
-        /**
-         *
-         */
-        public TestGiverAccountState() {
-        }
-
-        public TestGiverAccountState(int seqno) {
-            this.seqno = seqno;
-        }
-
-        /**
-         * Identifier uniquely determining type of the object.
-         */
-        public static final int CONSTRUCTOR = -696813142;
 
         /**
          * @return this.CONSTRUCTOR
@@ -668,6 +587,36 @@ public class TonApi {
     /**
      *
      */
+    public static class ConfigInfo extends Object {
+        public TvmCell config;
+
+        /**
+         *
+         */
+        public ConfigInfo() {
+        }
+
+        public ConfigInfo(TvmCell config) {
+            this.config = config;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 687887871;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
     public static class Data extends Object {
         public byte[] bytes;
 
@@ -947,82 +896,6 @@ public class TonApi {
          * Identifier uniquely determining type of the object.
          */
         public static final int CONSTRUCTOR = -337945529;
-
-        /**
-         * @return this.CONSTRUCTOR
-         */
-        @Override
-        public int getConstructor() {
-            return CONSTRUCTOR;
-        }
-    }
-
-    public static class TestGiverInitialAccountState extends InitialAccountState {
-
-        /**
-         *
-         */
-        public TestGiverInitialAccountState() {
-        }
-
-        /**
-         * Identifier uniquely determining type of the object.
-         */
-        public static final int CONSTRUCTOR = -1448412176;
-
-        /**
-         * @return this.CONSTRUCTOR
-         */
-        @Override
-        public int getConstructor() {
-            return CONSTRUCTOR;
-        }
-    }
-
-    public static class TestWalletInitialAccountState extends InitialAccountState {
-        public String publicKey;
-
-        /**
-         *
-         */
-        public TestWalletInitialAccountState() {
-        }
-
-        public TestWalletInitialAccountState(String publicKey) {
-            this.publicKey = publicKey;
-        }
-
-        /**
-         * Identifier uniquely determining type of the object.
-         */
-        public static final int CONSTRUCTOR = 819380068;
-
-        /**
-         * @return this.CONSTRUCTOR
-         */
-        @Override
-        public int getConstructor() {
-            return CONSTRUCTOR;
-        }
-    }
-
-    public static class WalletInitialAccountState extends InitialAccountState {
-        public String publicKey;
-
-        /**
-         *
-         */
-        public WalletInitialAccountState() {
-        }
-
-        public WalletInitialAccountState(String publicKey) {
-            this.publicKey = publicKey;
-        }
-
-        /**
-         * Identifier uniquely determining type of the object.
-         */
-        public static final int CONSTRUCTOR = -1122166790;
 
         /**
          * @return this.CONSTRUCTOR
@@ -1730,6 +1603,412 @@ public class TonApi {
         }
     }
 
+    /**
+     *
+     */
+    public static class BlocksAccountTransactionId extends Object {
+        public byte[] account;
+        public long lt;
+
+        /**
+         *
+         */
+        public BlocksAccountTransactionId() {
+        }
+
+        public BlocksAccountTransactionId(byte[] account, long lt) {
+            this.account = account;
+            this.lt = lt;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -872996220;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksBlockLinkBack extends Object {
+        public boolean toKeyBlock;
+        public TonBlockIdExt from;
+        public TonBlockIdExt to;
+        public byte[] destProof;
+        public byte[] proof;
+        public byte[] stateProof;
+
+        /**
+         *
+         */
+        public BlocksBlockLinkBack() {
+        }
+
+        public BlocksBlockLinkBack(boolean toKeyBlock, TonBlockIdExt from, TonBlockIdExt to, byte[] destProof, byte[] proof, byte[] stateProof) {
+            this.toKeyBlock = toKeyBlock;
+            this.from = from;
+            this.to = to;
+            this.destProof = destProof;
+            this.proof = proof;
+            this.stateProof = stateProof;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 1099726901;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksBlockSignatures extends Object {
+        public TonBlockIdExt id;
+        public BlocksSignature[] signatures;
+
+        /**
+         *
+         */
+        public BlocksBlockSignatures() {
+        }
+
+        public BlocksBlockSignatures(TonBlockIdExt id, BlocksSignature[] signatures) {
+            this.id = id;
+            this.signatures = signatures;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -402531429;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksHeader extends Object {
+        public TonBlockIdExt id;
+        public int globalId;
+        public int version;
+        public int flags;
+        public boolean afterMerge;
+        public boolean afterSplit;
+        public boolean beforeSplit;
+        public boolean wantMerge;
+        public boolean wantSplit;
+        public int validatorListHashShort;
+        public int catchainSeqno;
+        public int minRefMcSeqno;
+        public boolean isKeyBlock;
+        public int prevKeyBlockSeqno;
+        public long startLt;
+        public long endLt;
+        public long genUtime;
+        public int vertSeqno;
+        public TonBlockIdExt[] prevBlocks;
+
+        /**
+         *
+         */
+        public BlocksHeader() {
+        }
+
+        public BlocksHeader(TonBlockIdExt id, int globalId, int version, int flags, boolean afterMerge, boolean afterSplit, boolean beforeSplit, boolean wantMerge, boolean wantSplit, int validatorListHashShort, int catchainSeqno, int minRefMcSeqno, boolean isKeyBlock, int prevKeyBlockSeqno, long startLt, long endLt, long genUtime, int vertSeqno, TonBlockIdExt[] prevBlocks) {
+            this.id = id;
+            this.globalId = globalId;
+            this.version = version;
+            this.flags = flags;
+            this.afterMerge = afterMerge;
+            this.afterSplit = afterSplit;
+            this.beforeSplit = beforeSplit;
+            this.wantMerge = wantMerge;
+            this.wantSplit = wantSplit;
+            this.validatorListHashShort = validatorListHashShort;
+            this.catchainSeqno = catchainSeqno;
+            this.minRefMcSeqno = minRefMcSeqno;
+            this.isKeyBlock = isKeyBlock;
+            this.prevKeyBlockSeqno = prevKeyBlockSeqno;
+            this.startLt = startLt;
+            this.endLt = endLt;
+            this.genUtime = genUtime;
+            this.vertSeqno = vertSeqno;
+            this.prevBlocks = prevBlocks;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 1479116386;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksMasterchainInfo extends Object {
+        public TonBlockIdExt last;
+        public byte[] stateRootHash;
+        public TonBlockIdExt init;
+
+        /**
+         *
+         */
+        public BlocksMasterchainInfo() {
+        }
+
+        public BlocksMasterchainInfo(TonBlockIdExt last, byte[] stateRootHash, TonBlockIdExt init) {
+            this.last = last;
+            this.stateRootHash = stateRootHash;
+            this.init = init;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 835339083;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksShardBlockLink extends Object {
+        public TonBlockIdExt id;
+        public byte[] proof;
+
+        /**
+         *
+         */
+        public BlocksShardBlockLink() {
+        }
+
+        public BlocksShardBlockLink(TonBlockIdExt id, byte[] proof) {
+            this.id = id;
+            this.proof = proof;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1495263895;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksShardBlockProof extends Object {
+        public TonBlockIdExt from;
+        public TonBlockIdExt mcId;
+        public BlocksShardBlockLink[] links;
+        public BlocksBlockLinkBack[] mcProof;
+
+        /**
+         *
+         */
+        public BlocksShardBlockProof() {
+        }
+
+        public BlocksShardBlockProof(TonBlockIdExt from, TonBlockIdExt mcId, BlocksShardBlockLink[] links, BlocksBlockLinkBack[] mcProof) {
+            this.from = from;
+            this.mcId = mcId;
+            this.links = links;
+            this.mcProof = mcProof;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -69836973;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksShards extends Object {
+        public TonBlockIdExt[] shards;
+
+        /**
+         *
+         */
+        public BlocksShards() {
+        }
+
+        public BlocksShards(TonBlockIdExt[] shards) {
+            this.shards = shards;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 2069473610;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksSignature extends Object {
+        public byte[] nodeIdShort;
+        public byte[] signature;
+
+        /**
+         *
+         */
+        public BlocksSignature() {
+        }
+
+        public BlocksSignature(byte[] nodeIdShort, byte[] signature) {
+            this.nodeIdShort = nodeIdShort;
+            this.signature = signature;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1223522111;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksTransactions extends Object {
+        public TonBlockIdExt id;
+        public int reqCount;
+        public boolean incomplete;
+        public BlocksShortTxId[] transactions;
+
+        /**
+         *
+         */
+        public BlocksTransactions() {
+        }
+
+        public BlocksTransactions(TonBlockIdExt id, int reqCount, boolean incomplete, BlocksShortTxId[] transactions) {
+            this.id = id;
+            this.reqCount = reqCount;
+            this.incomplete = incomplete;
+            this.transactions = transactions;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1922305900;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksTransactionsExt extends Object {
+        public TonBlockIdExt id;
+        public int reqCount;
+        public boolean incomplete;
+        public RawTransaction[] transactions;
+
+        /**
+         *
+         */
+        public BlocksTransactionsExt() {
+        }
+
+        public BlocksTransactionsExt(TonBlockIdExt id, int reqCount, boolean incomplete, RawTransaction[] transactions) {
+            this.id = id;
+            this.reqCount = reqCount;
+            this.incomplete = incomplete;
+            this.transactions = transactions;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 1338592797;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
     public abstract static class DnsAction extends Object {
     }
 
@@ -1757,7 +2036,7 @@ public class TonApi {
 
     public static class DnsActionDelete extends DnsAction {
         public String name;
-        public int category;
+        public byte[] category;
 
         /**
          *
@@ -1765,7 +2044,7 @@ public class TonApi {
         public DnsActionDelete() {
         }
 
-        public DnsActionDelete(String name, int category) {
+        public DnsActionDelete(String name, byte[] category) {
             this.name = name;
             this.category = category;
         }
@@ -1773,7 +2052,7 @@ public class TonApi {
         /**
          * Identifier uniquely determining type of the object.
          */
-        public static final int CONSTRUCTOR = 775206882;
+        public static final int CONSTRUCTOR = 1141342033;
 
         /**
          * @return this.CONSTRUCTOR
@@ -1816,7 +2095,7 @@ public class TonApi {
      */
     public static class DnsEntry extends Object {
         public String name;
-        public int category;
+        public byte[] category;
         public DnsEntryData entry;
 
         /**
@@ -1825,7 +2104,7 @@ public class TonApi {
         public DnsEntry() {
         }
 
-        public DnsEntry(String name, int category, DnsEntryData entry) {
+        public DnsEntry(String name, byte[] category, DnsEntryData entry) {
             this.name = name;
             this.category = category;
             this.entry = entry;
@@ -1834,7 +2113,7 @@ public class TonApi {
         /**
          * Identifier uniquely determining type of the object.
          */
-        public static final int CONSTRUCTOR = -1842435400;
+        public static final int CONSTRUCTOR = 505104294;
 
         /**
          * @return this.CONSTRUCTOR
@@ -1983,6 +2262,33 @@ public class TonApi {
         }
     }
 
+    public static class DnsEntryDataStorageAddress extends DnsEntryData {
+        public byte[] bagId;
+
+        /**
+         *
+         */
+        public DnsEntryDataStorageAddress() {
+        }
+
+        public DnsEntryDataStorageAddress(byte[] bagId) {
+            this.bagId = bagId;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1751100388;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
     /**
      *
      */
@@ -2103,6 +2409,42 @@ public class TonApi {
          * Identifier uniquely determining type of the object.
          */
         public static final int CONSTRUCTOR = -1250165133;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class BlocksShortTxId extends Object {
+        public int mode;
+        public byte[] account;
+        public long lt;
+        public byte[] hash;
+
+        /**
+         *
+         */
+        public BlocksShortTxId() {
+        }
+
+        public BlocksShortTxId(int mode, byte[] account, long lt, byte[] hash) {
+            this.mode = mode;
+            this.account = account;
+            this.lt = lt;
+            this.hash = hash;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 487976773;
 
         /**
          * @return this.CONSTRUCTOR
@@ -2358,6 +2700,7 @@ public class TonApi {
         public String publicKey;
         public long amount;
         public MsgData data;
+        public int sendMode;
 
         /**
          *
@@ -2365,17 +2708,18 @@ public class TonApi {
         public MsgMessage() {
         }
 
-        public MsgMessage(AccountAddress destination, String publicKey, long amount, MsgData data) {
+        public MsgMessage(AccountAddress destination, String publicKey, long amount, MsgData data, int sendMode) {
             this.destination = destination;
             this.publicKey = publicKey;
             this.amount = amount;
             this.data = data;
+            this.sendMode = sendMode;
         }
 
         /**
          * Identifier uniquely determining type of the object.
          */
-        public static final int CONSTRUCTOR = -2110533580;
+        public static final int CONSTRUCTOR = 807907444;
 
         /**
          * @return this.CONSTRUCTOR
@@ -2798,6 +3142,36 @@ public class TonApi {
     /**
      *
      */
+    public static class RawExtMessageInfo extends Object {
+        public byte[] hash;
+
+        /**
+         *
+         */
+        public RawExtMessageInfo() {
+        }
+
+        public RawExtMessageInfo(byte[] hash) {
+            this.hash = hash;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 874086318;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
     public static class RawFullAccountState extends Object {
         public long balance;
         public byte[] code;
@@ -2885,6 +3259,7 @@ public class TonApi {
      *
      */
     public static class RawTransaction extends Object {
+        public AccountAddress address;
         public long utime;
         public byte[] data;
         public InternalTransactionId transactionId;
@@ -2900,7 +3275,8 @@ public class TonApi {
         public RawTransaction() {
         }
 
-        public RawTransaction(long utime, byte[] data, InternalTransactionId transactionId, long fee, long storageFee, long otherFee, RawMessage inMsg, RawMessage[] outMsgs) {
+        public RawTransaction(AccountAddress address, long utime, byte[] data, InternalTransactionId transactionId, long fee, long storageFee, long otherFee, RawMessage inMsg, RawMessage[] outMsgs) {
+            this.address = address;
             this.utime = utime;
             this.data = data;
             this.transactionId = transactionId;
@@ -2914,7 +3290,7 @@ public class TonApi {
         /**
          * Identifier uniquely determining type of the object.
          */
-        public static final int CONSTRUCTOR = 1887601793;
+        public static final int CONSTRUCTOR = -1905746086;
 
         /**
          * @return this.CONSTRUCTOR
@@ -3071,6 +3447,68 @@ public class TonApi {
          * Identifier uniquely determining type of the object.
          */
         public static final int CONSTRUCTOR = 1134270012;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class SmcLibraryEntry extends Object {
+        public byte[] hash;
+        public byte[] data;
+
+        /**
+         *
+         */
+        public SmcLibraryEntry() {
+        }
+
+        public SmcLibraryEntry(byte[] hash, byte[] data) {
+            this.hash = hash;
+            this.data = data;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1546268148;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     */
+    public static class SmcLibraryResult extends Object {
+        public SmcLibraryEntry[] result;
+
+        /**
+         *
+         */
+        public SmcLibraryResult() {
+        }
+
+        public SmcLibraryResult(SmcLibraryEntry[] result) {
+            this.result = result;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 203930622;
 
         /**
          * @return this.CONSTRUCTOR
@@ -3573,6 +4011,295 @@ public class TonApi {
     /**
      *
      *
+     * <p> Returns {@link BlocksHeader BlocksHeader} </p>
+     */
+    public static class BlocksGetBlockHeader extends Function {
+        public TonBlockIdExt id;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link BlocksHeader BlocksHeader} </p>
+         */
+        public BlocksGetBlockHeader() {
+        }
+
+        public BlocksGetBlockHeader(TonBlockIdExt id) {
+            this.id = id;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 1915102018;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link BlocksBlockSignatures BlocksBlockSignatures} </p>
+     */
+    public static class BlocksGetMasterchainBlockSignatures extends Function {
+        public int seqno;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link BlocksBlockSignatures BlocksBlockSignatures} </p>
+         */
+        public BlocksGetMasterchainBlockSignatures() {
+        }
+
+        public BlocksGetMasterchainBlockSignatures(int seqno) {
+            this.seqno = seqno;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 1616913876;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link BlocksMasterchainInfo BlocksMasterchainInfo} </p>
+     */
+    public static class BlocksGetMasterchainInfo extends Function {
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link BlocksMasterchainInfo BlocksMasterchainInfo} </p>
+         */
+        public BlocksGetMasterchainInfo() {
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -45493615;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link BlocksShardBlockProof BlocksShardBlockProof} </p>
+     */
+    public static class BlocksGetShardBlockProof extends Function {
+        public TonBlockIdExt id;
+        public int mode;
+        public TonBlockIdExt from;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link BlocksShardBlockProof BlocksShardBlockProof} </p>
+         */
+        public BlocksGetShardBlockProof() {
+        }
+
+        public BlocksGetShardBlockProof(TonBlockIdExt id, int mode, TonBlockIdExt from) {
+            this.id = id;
+            this.mode = mode;
+            this.from = from;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 435003111;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link BlocksShards BlocksShards} </p>
+     */
+    public static class BlocksGetShards extends Function {
+        public TonBlockIdExt id;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link BlocksShards BlocksShards} </p>
+         */
+        public BlocksGetShards() {
+        }
+
+        public BlocksGetShards(TonBlockIdExt id) {
+            this.id = id;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 2072773677;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link BlocksTransactions BlocksTransactions} </p>
+     */
+    public static class BlocksGetTransactions extends Function {
+        public TonBlockIdExt id;
+        public int mode;
+        public int count;
+        public BlocksAccountTransactionId after;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link BlocksTransactions BlocksTransactions} </p>
+         */
+        public BlocksGetTransactions() {
+        }
+
+        public BlocksGetTransactions(TonBlockIdExt id, int mode, int count, BlocksAccountTransactionId after) {
+            this.id = id;
+            this.mode = mode;
+            this.count = count;
+            this.after = after;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -896152271;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link BlocksTransactionsExt BlocksTransactionsExt} </p>
+     */
+    public static class BlocksGetTransactionsExt extends Function {
+        public TonBlockIdExt id;
+        public int mode;
+        public int count;
+        public BlocksAccountTransactionId after;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link BlocksTransactionsExt BlocksTransactionsExt} </p>
+         */
+        public BlocksGetTransactionsExt() {
+        }
+
+        public BlocksGetTransactionsExt(TonBlockIdExt id, int mode, int count, BlocksAccountTransactionId after) {
+            this.id = id;
+            this.mode = mode;
+            this.count = count;
+            this.after = after;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1527774002;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link TonBlockIdExt TonBlockIdExt} </p>
+     */
+    public static class BlocksLookupBlock extends Function {
+        public int mode;
+        public TonBlockId id;
+        public long lt;
+        public int utime;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link TonBlockIdExt TonBlockIdExt} </p>
+         */
+        public BlocksLookupBlock() {
+        }
+
+        public BlocksLookupBlock(int mode, TonBlockId id, long lt, int utime) {
+            this.mode = mode;
+            this.id = id;
+            this.lt = lt;
+            this.utime = utime;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 1418484659;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
      * <p> Returns {@link Key Key} </p>
      */
     public static class ChangeLocalPassword extends Function {
@@ -3822,7 +4549,7 @@ public class TonApi {
     public static class DnsResolve extends Function {
         public AccountAddress accountAddress;
         public String name;
-        public int category;
+        public byte[] category;
         public int ttl;
 
         /**
@@ -3833,7 +4560,7 @@ public class TonApi {
         public DnsResolve() {
         }
 
-        public DnsResolve(AccountAddress accountAddress, String name, int category, int ttl) {
+        public DnsResolve(AccountAddress accountAddress, String name, byte[] category, int ttl) {
             this.accountAddress = accountAddress;
             this.name = name;
             this.category = category;
@@ -3843,7 +4570,7 @@ public class TonApi {
         /**
          * Identifier uniquely determining type of the object.
          */
-        public static final int CONSTRUCTOR = -149238065;
+        public static final int CONSTRUCTOR = 1791399222;
 
         /**
          * @return this.CONSTRUCTOR
@@ -4105,6 +4832,42 @@ public class TonApi {
     /**
      *
      *
+     * <p> Returns {@link FullAccountState FullAccountState} </p>
+     */
+    public static class GetAccountStateByTransaction extends Function {
+        public AccountAddress accountAddress;
+        public InternalTransactionId transactionId;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link FullAccountState FullAccountState} </p>
+         */
+        public GetAccountStateByTransaction() {
+        }
+
+        public GetAccountStateByTransaction(AccountAddress accountAddress, InternalTransactionId transactionId) {
+            this.accountAddress = accountAddress;
+            this.transactionId = transactionId;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 756813774;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
      * <p> Returns {@link Bip39Hints Bip39Hints} </p>
      */
     public static class GetBip39Hints extends Function {
@@ -4126,6 +4889,76 @@ public class TonApi {
          * Identifier uniquely determining type of the object.
          */
         public static final int CONSTRUCTOR = -1889640982;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link ConfigInfo ConfigInfo} </p>
+     */
+    public static class GetConfigAll extends Function {
+        public int mode;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link ConfigInfo ConfigInfo} </p>
+         */
+        public GetConfigAll() {
+        }
+
+        public GetConfigAll(int mode) {
+            this.mode = mode;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 484522064;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link ConfigInfo ConfigInfo} </p>
+     */
+    public static class GetConfigParam extends Function {
+        public int mode;
+        public int param;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link ConfigInfo ConfigInfo} </p>
+         */
+        public GetConfigParam() {
+        }
+
+        public GetConfigParam(int mode, int param) {
+            this.mode = mode;
+            this.param = param;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -234421517;
 
         /**
          * @return this.CONSTRUCTOR
@@ -4257,6 +5090,76 @@ public class TonApi {
          * Identifier uniquely determining type of the object.
          */
         public static final int CONSTRUCTOR = 594057956;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link TvmCell TvmCell} </p>
+     */
+    public static class GetShardAccountCell extends Function {
+        public AccountAddress accountAddress;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link TvmCell TvmCell} </p>
+         */
+        public GetShardAccountCell() {
+        }
+
+        public GetShardAccountCell(AccountAddress accountAddress) {
+            this.accountAddress = accountAddress;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1734437861;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link TvmCell TvmCell} </p>
+     */
+    public static class GetShardAccountCellByTransaction extends Function {
+        public AccountAddress accountAddress;
+        public InternalTransactionId transactionId;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link TvmCell TvmCell} </p>
+         */
+        public GetShardAccountCellByTransaction() {
+        }
+
+        public GetShardAccountCellByTransaction(AccountAddress accountAddress, InternalTransactionId transactionId) {
+            this.accountAddress = accountAddress;
+            this.transactionId = transactionId;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 406971329;
 
         /**
          * @return this.CONSTRUCTOR
@@ -5229,6 +6132,42 @@ public class TonApi {
     /**
      *
      *
+     * <p> Returns {@link RawFullAccountState RawFullAccountState} </p>
+     */
+    public static class RawGetAccountStateByTransaction extends Function {
+        public AccountAddress accountAddress;
+        public InternalTransactionId transactionId;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link RawFullAccountState RawFullAccountState} </p>
+         */
+        public RawGetAccountStateByTransaction() {
+        }
+
+        public RawGetAccountStateByTransaction(AccountAddress accountAddress, InternalTransactionId transactionId) {
+            this.accountAddress = accountAddress;
+            this.transactionId = transactionId;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 714199203;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
      * <p> Returns {@link RawTransactions RawTransactions} </p>
      */
     public static class RawGetTransactions extends Function {
@@ -5267,6 +6206,48 @@ public class TonApi {
     /**
      *
      *
+     * <p> Returns {@link RawTransactions RawTransactions} </p>
+     */
+    public static class RawGetTransactionsV2 extends Function {
+        public InputKey privateKey;
+        public AccountAddress accountAddress;
+        public InternalTransactionId fromTransactionId;
+        public int count;
+        public boolean tryDecodeMessages;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link RawTransactions RawTransactions} </p>
+         */
+        public RawGetTransactionsV2() {
+        }
+
+        public RawGetTransactionsV2(InputKey privateKey, AccountAddress accountAddress, InternalTransactionId fromTransactionId, int count, boolean tryDecodeMessages) {
+            this.privateKey = privateKey;
+            this.accountAddress = accountAddress;
+            this.fromTransactionId = fromTransactionId;
+            this.count = count;
+            this.tryDecodeMessages = tryDecodeMessages;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -566264666;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
      * <p> Returns {@link Ok Ok} </p>
      */
     public static class RawSendMessage extends Function {
@@ -5288,6 +6269,40 @@ public class TonApi {
          * Identifier uniquely determining type of the object.
          */
         public static final int CONSTRUCTOR = -1789427488;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link RawExtMessageInfo RawExtMessageInfo} </p>
+     */
+    public static class RawSendMessageReturnHash extends Function {
+        public byte[] body;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link RawExtMessageInfo RawExtMessageInfo} </p>
+         */
+        public RawSendMessageReturnHash() {
+        }
+
+        public RawSendMessageReturnHash(byte[] body) {
+            this.body = body;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1228445927;
 
         /**
          * @return this.CONSTRUCTOR
@@ -5473,6 +6488,40 @@ public class TonApi {
     /**
      *
      *
+     * <p> Returns {@link Ok Ok} </p>
+     */
+    public static class SmcForget extends Function {
+        public long id;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link Ok Ok} </p>
+         */
+        public SmcForget() {
+        }
+
+        public SmcForget(long id) {
+            this.id = id;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 911028710;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
      * <p> Returns {@link TvmCell TvmCell} </p>
      */
     public static class SmcGetCode extends Function {
@@ -5541,6 +6590,40 @@ public class TonApi {
     /**
      *
      *
+     * <p> Returns {@link SmcLibraryResult SmcLibraryResult} </p>
+     */
+    public static class SmcGetLibraries extends Function {
+        public byte[][] libraryList;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link SmcLibraryResult SmcLibraryResult} </p>
+         */
+        public SmcGetLibraries() {
+        }
+
+        public SmcGetLibraries(byte[][] libraryList) {
+            this.libraryList = libraryList;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 814345749;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
      * <p> Returns {@link TvmCell TvmCell} </p>
      */
     public static class SmcGetState extends Function {
@@ -5596,6 +6679,42 @@ public class TonApi {
          * Identifier uniquely determining type of the object.
          */
         public static final int CONSTRUCTOR = -903491521;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     *
+     *
+     * <p> Returns {@link SmcInfo SmcInfo} </p>
+     */
+    public static class SmcLoadByTransaction extends Function {
+        public AccountAddress accountAddress;
+        public InternalTransactionId transactionId;
+
+        /**
+         * Default constructor for a function, which
+         *
+         * <p> Returns {@link SmcInfo SmcInfo} </p>
+         */
+        public SmcLoadByTransaction() {
+        }
+
+        public SmcLoadByTransaction(AccountAddress accountAddress, InternalTransactionId transactionId) {
+            this.accountAddress = accountAddress;
+            this.transactionId = transactionId;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -2019210447;
 
         /**
          * @return this.CONSTRUCTOR
@@ -5717,7 +6836,7 @@ public class TonApi {
         public Function function;
 
         /**
-         * Default constructor for a function, which 
+         * Default constructor for a function, which
          *
          * <p> Returns {@link Object Object} </p>
          */

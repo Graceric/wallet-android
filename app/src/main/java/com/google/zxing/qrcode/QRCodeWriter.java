@@ -206,7 +206,7 @@ public final class QRCodeWriter {
       }
     }
 
-    Drawable drawable = context.getResources().getDrawable(R.drawable.gem_l).mutate();
+    Drawable drawable = context.getResources().getDrawable(R.drawable.baseline_gem_static_40).mutate();
     drawable.setBounds(imageX, imageX, imageX + imageSize, imageX + imageSize);
     drawable.draw(canvas);
 

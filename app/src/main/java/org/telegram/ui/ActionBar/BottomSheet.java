@@ -22,9 +22,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.core.view.NestedScrollingParent;
-import androidx.core.view.NestedScrollingParentHelper;
-import androidx.core.view.ViewCompat;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -41,12 +38,18 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.view.NestedScrollingParent;
+import androidx.core.view.NestedScrollingParentHelper;
+import androidx.core.view.ViewCompat;
+
+import org.TonController.AccountsStateManager;
+import org.TonController.TonController;
 import org.telegram.messenger.AndroidUtilities;
-import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.FileLog;
+import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.NotificationCenter;
 import org.telegram.messenger.R;
-import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.Utilities;
 import org.telegram.ui.Components.AnimationProperties;
 import org.telegram.ui.Components.CubicBezierInterpolator;
 import org.telegram.ui.Components.LayoutHelper;
@@ -54,8 +57,8 @@ import org.telegram.ui.Components.LayoutHelper;
 import java.util.ArrayList;
 
 public class BottomSheet extends Dialog {
-
-    protected int currentAccount = UserConfig.selectedAccount;
+    protected BaseFragment parentFragment;
+    protected int currentAccount = Utilities.selectedAccount;
     protected ViewGroup containerView;
     protected ContainerView container;
     private WindowInsets lastInsets;
@@ -558,8 +561,10 @@ public class BottomSheet extends Dialog {
         }
     }
 
-    public BottomSheet(Context context, boolean needFocus) {
-        super(context, R.style.TransparentDialog);
+    public BottomSheet(BaseFragment parentFragment, boolean needFocus) {
+        super(parentFragment.getParentActivity(), R.style.TransparentDialog);
+        this.parentFragment = parentFragment;
+        Context context = parentFragment.getParentActivity();
 
         if (Build.VERSION.SDK_INT >= 21) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -598,6 +603,18 @@ public class BottomSheet extends Dialog {
         }
 
         backDrawable.setAlpha(0);
+    }
+
+    public void onParentFragmentPause () {
+
+    }
+
+    public void onParentFragmentResume () {
+
+    }
+
+    public BaseFragment getParentFragment() {
+        return parentFragment;
     }
 
     @Override
@@ -1060,12 +1077,12 @@ public class BottomSheet extends Dialog {
 
         private BottomSheet bottomSheet;
 
-        public Builder(Context context) {
-            bottomSheet = new BottomSheet(context, false);
+        public Builder(BaseFragment parent) {
+            bottomSheet = new BottomSheet(parent, false);
         }
 
-        public Builder(Context context, boolean needFocus) {
-            bottomSheet = new BottomSheet(context, needFocus);
+        public Builder(BaseFragment parent, boolean needFocus) {
+            bottomSheet = new BottomSheet(parent, needFocus);
         }
 
         public Builder setItems(CharSequence[] items, final OnClickListener onClickListener) {
@@ -1170,5 +1187,25 @@ public class BottomSheet extends Dialog {
 
     public void onContainerDraw(Canvas canvas) {
 
+    }
+
+    public TonController getTonController () {
+        return parentFragment.getTonController();
+    }
+
+    public AccountsStateManager getAccountsStateManager () {
+        return parentFragment.getTonAccountStateManager();
+    }
+
+    public int getBackgroundPaddingLeft() {
+        return backgroundPaddingLeft;
+    }
+
+    public int getBackgroundPaddingTop() {
+        return backgroundPaddingTop;
+    }
+
+    public Drawable getShadowDrawable() {
+        return shadowDrawable;
     }
 }

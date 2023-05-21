@@ -278,10 +278,10 @@ public class ThemeDescription {
                 ((ActionBar) viewToInvalidate).setSearchTextColor(color, false);
             }
             if ((changeFlags & FLAG_AB_SUBMENUITEM) != 0) {
-                ((ActionBar) viewToInvalidate).setPopupItemsColor(color, (changeFlags & FLAG_IMAGECOLOR) != 0);
+                ((ActionBar) viewToInvalidate).setPopupItemsColor(color, (changeFlags & FLAG_IMAGECOLOR) != 0, false);
             }
             if ((changeFlags & FLAG_AB_SUBMENUBACKGROUND) != 0) {
-                ((ActionBar) viewToInvalidate).setPopupBackgroundColor(color);
+                ((ActionBar) viewToInvalidate).setPopupBackgroundColor(color, false);
             }
         }
         if (viewToInvalidate instanceof RadialProgressView) {

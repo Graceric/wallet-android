@@ -93,4 +93,9 @@ public class RLottieImageView extends ImageView {
             startOnAttach = true;
         }
     }
+
+    @Override
+    public RLottieDrawable getDrawable() {
+        return drawable;
+    }
 }

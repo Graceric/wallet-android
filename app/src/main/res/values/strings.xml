@@ -5,7 +5,8 @@
     <string name="ErrorOccurred">An error occurred.</string>
     <string name="TextCopied">Text copied to clipboard</string>
     <string name="Cancel">Cancel</string>
-    <string name="PermissionOpenSettings">SETTINGS</string>
+    <string name="Confirm">Confirm</string>
+    <string name="PermissionOpenSettings">Open Settings</string>
     <string name="OK">OK</string>
     <string name="AccDescrMoreOptions">More options</string>
     <string name="LinkCopied">Link copied to clipboard</string>
@@ -33,26 +34,89 @@
     <string name="October">October</string>
     <string name="November">November</string>
     <string name="December">December</string>
+
     <!--wallet-->
     <string name="Wallet">Wallet</string>
+    <string name="WalletEdit">Edit</string>
+    <string name="WalletGeneral">General</string>
+    <string name="WalletNotifications">Notifications</string>
+    <string name="WalletAddressType">Active address</string>
+    <string name="WalletPrimaryCurrency">Primary currency</string>
+    <string name="WalletListOfTokens">List of tokens</string>
+    <string name="WalletTokens">Tokens</string>
+    <string name="WalletScanNoAccess">No Camera Access</string>
+    <string name="WalletBiometricAuth">Biometric Auth</string>
+    <string name="WalletEnableBiometricAuth">Enable Biometric Auth</string>
+    <string name="WalletReceiveYourAddress">Receive TON</string>
+    <string name="WalletSendPasteDescription">Paste the 24-letter wallet address of the recipient here or TON DNS.</string>
+    <string name="WalletPaste">Paste</string>
+    <string name="WalletScan">Scan</string>
+    <string name="WalletInvalidAddress">Invalid Address</string>
+    <string name="WalletInvalidDomain">Invalid Domain</string>
+    <string name="WalletInvalidAddressInfo">Address entered does not belong to TON</string>
+    <string name="WalletInvalidDomainInfo">Failed to get domain information</string>
+    <string name="WalletConfirmAndSend">Confirm and Send</string>
+
+    <string name="WalletSendTransactionInsufficientFunds">Insufficient funds</string>
+    <string name="WalletSendTransactionRecipient">Recipient</string>
+    <string name="WalletSendTransactionRecipientAddress">Recipient address</string>
+    <string name="WalletSendTransactionAmount">Amount</string>
+    <string name="WalletSendTransactionFee">Fee</string>
+    <string name="WalletSendTransactionCommentWarning">The comment is visible to everyone. You must include the note when sending to an exchange.</string>
+    <string name="WalletCommentHint">Description of the payment</string>
+    <string name="WalletSendAll">Send all</string>
+    <string name="WalletCommentCharactersLeft">%1$s characters left.</string>
+    <string name="WalletCommentCharactersOverflow">Message size has been exceeded by %1$s characters.</string>
+
+    <string name="WalletEnterPasscodeDigit">Enter the %1$s digits in the passcode.</string>
+    <string name="WalletEnterPasscode4Digit">Enter the 4 digits in the passcode.</string>
+    <string name="WalletEnterPasscode6Digit">Enter the 6 digits in the passcode.</string>
+    <string name="WalletNotFoundFingerprint">Fingerprint not set. Please open system settings to enable biometric authentication</string>
+
+    <string name="TonConnect">TON Connect</string>
+    <string name="TonConnectActiveConnections">Active connections</string>
+    <string name="TonConnectConnectTo">Connect to %1$s</string>
+    <string name="TonConnectApp">%1$s dApp</string>
+    <string name="TonConnectTransfer">TON Transfer</string>
+    <string name="TonConnectRequestingAccess">%1$s is requesting access to your wallet address</string>
+    <string name="TonConnectRequestingAccessTransaction">%1$s is requesting to send Toncoins from your wallet address</string>
+    <string name="TonConnectRequestingAccessTransactionBut">But your current wallet address is</string>
+    <string name="TonConnectRequestingAddressSwitch">Do you want to switch address?</string>
+    <string name="Switch">Switch</string>
+
+    <string name="WalletSendX">Send %1$s</string>
+    <string name="WalletSendingX">Sending %1$s</string>
+
+    <string name="TonConnectConnectHaveAccess">%1$s has access to your wallet</string>
+    <string name="TonConnectConnectDisclaimer">Be sure to check the service address before connecting the wallet.</string>
+    <string name="TonConnectConnectDisconnectHint">You can revoke access to the wallet. %1$s will no longer be able to send transaction requests.</string>
+    <string name="TonConnectConnectReadTerms">Show terms of use</string>
+    <string name="TonConnectConnectReadPrivacy">Show privacy policy</string>
+    <string name="TonConnectDisconnect">Disconnect</string>
+    <string name="TonTokenRemove">Remove</string>
+
+    <string name="WalletAddToken">Add Token</string>
     <string name="WalletScanCode">Scan QR Code</string>
+    <string name="WalletConnect">Connect wallet</string>
     <string name="WalletQRCode">QR Code</string>
     <string name="WalletScanImageNotFound">No wallet address found in the selected image.</string>
     <string name="WalletScanCodeNotFound">No wallet address found</string>
-    <string name="GramWallet">Toncoin Wallet</string>
+    <string name="GramWallet">TON Wallet</string>
     <string name="CreateMyWallet">Create My Wallet</string>
     <string name="ImportExistingWallet">Import existing wallet</string>
     <string name="WalletCongratulations">Congratulations</string>
-    <string name="WalletCongratulationsinfo">Your Toncoin wallet has just been created. Only you control it.\n\nTo be able to always have access to it, please write down secret words and set up a secure passcode.</string>
+    <string name="WalletCongratulationsinfo">Your TON Wallet has just been created. Only you control it.\n\nTo be able to always have access to it, please write down secret words and set up a secure passcode.</string>
     <string name="WalletContinue">Continue</string>
+    <string name="WalletProceed">Proceed</string>
     <string name="WalletClose">CLOSE</string>
-    <string name="WalletSecretWords">24 Secret Words</string>
-    <string name="WalletSecretWordsTitle">Secret Words</string>
-    <string name="WalletSecretWordsInfo">Write down these 24 words in the correct order and store them in a secret place.\n\nUse these secret words to restore access to your wallet if you lose your passcode or device.</string>
+    <string name="WalletSecretWords">Your Recovery Phrase</string>
+    <string name="WalletSecretWordsTitle">24 Secret Words</string>
+    <string name="WalletSecretWordsInfo">Write down these 24 words in this exact order and keep them in a secure place. Do not share this list with anyone. If you lose it, you will irrevocably lose access to your TON account.</string>
     <string name="WalletDone">Done</string>
     <string name="WalletSecretWordsAlertTitle">Sure done?</string>
     <string name="WalletSecretWordsAlertText">You didn’t have enough time to write these words down.</string>
-    <string name="WalletSecretWordsAlertButton">OK, SORRY</string>
+    <string name="WalletSecretWordsAlertButton">OK, sorry</string>
+    <string name="WalletSecretWordsAlertButtonSkip">Skip</string>
     <string name="WalletTestTime">Test time!</string>
     <string name="WalletTestTimeTitle">Test Time!</string>
     <string name="WalletTestTimeInfo">Now let’s check that you wrote your secret words correctly.\n\nPlease enter the words **%d**, **%d** and **%d** below:</string>
@@ -61,10 +125,10 @@
     <string name="WalletTestTimeAlertButtonSee">See words</string>
     <string name="WalletTestTimeAlertButtonTry">Try again</string>
     <string name="WalletReady">Ready to go!</string>
-    <string name="WalletReadyInfo">You are all set. Now you have a wallet that only you control — directly, without middlemen or bankers.</string>
-    <string name="WalletView">View My Wallet</string>
+    <string name="WalletReadyInfo">You are all set. Now you have a wallet that only you control — directly, without middlemen or bankers. </string>
+    <string name="WalletView">View my wallet</string>
     <string name="WalletImportInfo">You can restore access to your wallet by entering the 24 words you wrote down when creating the wallet.</string>
-    <string name="WalletImportDontHave">I don’t have them</string>
+    <string name="WalletImportDontHave">I don’t have those</string>
     <string name="WalletImportAlertTitle">Incorrect words</string>
     <string name="WalletImportAlertText">Sorry, you have entered incorrect secret words. Please double check and try again.</string>
     <string name="WalletTooBad">Too Bad!</string>
@@ -72,7 +136,7 @@
     <string name="WalletTooBadEnter">Enter 24 secret words</string>
     <string name="WalletTooBadCreate">Create a new empty wallet instead</string>
     <string name="WalletPerfect">Perfect!</string>
-    <string name="WalletPerfectInfo">Now set up a passcode to secure your transactions.</string>
+    <string name="WalletPerfectInfo">Now set up a passcode to secure transactions.</string>
     <string name="WalletPerfectSetPasscode">Set a Passcode</string>
     <string name="WalletSetPasscode">Set a Passcode</string>
     <string name="WalletSetPasscodeRepeat">Repeat the Passcode</string>
@@ -86,6 +150,8 @@
     <string name="WalletSetPasscodeMinLength">Minimum passcode length is 4</string>
     <string name="WalletSendDone">Done!</string>
     <string name="WalletSendDoneText">%1$s Toncoin have been sent to</string>
+    <string name="WalletSendXDoneText">%1$s %2$s have been sent to</string>
+    <string name="WalletImportDone">Your wallet has just been imported!</string>
     <string name="WalletYourBalance">Your balance</string>
     <string name="WalletYourTestBalance">Your balance</string>
     <string name="WalletLockedBalance">%1$s * locked</string>
@@ -95,27 +161,27 @@
     <string name="WalletYourAddress">Your wallet address</string>
     <string name="WalletFrom">from:</string>
     <string name="WalletTo">to:</string>
-    <string name="WalletReceiveYourAddress">Your Wallet Address</string>
     <string name="WalletCopyAddress">Copy wallet address</string>
     <string name="WalletCreateInvoice">Create invoice</string>
     <string name="WalletShareAddress">Share Wallet Address</string>
     <string name="WalletUpdatedFewSecondsAgo">updated a few seconds ago</string>
-    <string name="WalletUpdatedTimeAgo">updated %1$s ago</string>
+    <string name="WalletUpdatedTimeAgo">Updated %1$s ago</string>
     <string name="WalletSwipeToRefresh">Swipe down to refresh</string>
     <string name="WalletReleaseToRefresh">Release to refresh</string>
-    <string name="WalletUpdating">updating</string>
-    <string name="WalletUpdatingProgress">updating %d%%</string>
-    <string name="WalletSendGrams">Send Toncoin</string>
-    <string name="WalletSendRecipient">Recipient wallet address</string>
-    <string name="WalletEnterWalletAddress">Enter wallet address</string>
+    <string name="WalletUpdating">Updating...</string>
+    <string name="WalletUpdatingProgress">Updating %d%%...</string>
+    <string name="WalletSendGrams">Send TON</string>
+    <string name="WalletSendRecipient">Wallet Address or Domain</string>
+    <string name="WalletEnterWalletAddress">Enter Wallet Address or Domain...</string>
     <string name="WalletAddressCopy">Copy the 48-letter wallet address of the recipient here or ask them to send you a ton:// link.</string>
     <string name="WalletAmount">Amount</string>
     <string name="WalletComment">Comment (optional)</string>
+    <string name="WalletPayload">Payload</string>
     <string name="WalletInvoiceInfo">You can specify the amount and purpose of the payment to save the sender some time:</string>
     <string name="WalletShareInvoiceUrl">Share Invoice URL</string>
     <string name="WalletBuy">Buy</string>
     <string name="WalletSell">Sell</string>
-    <string name="WalletShareInfo">Share this address to receive Toncoin.</string>
+    <string name="WalletShareInfo">Share this address with other TON wallet owners to receive TON from them.</string>
     <string name="WalletTestShareInfo">Share this address to receive Toncoin.</string>
     <string name="WalletShareInvoiceUrlInfo">Share this link to receive **%1$s Toncoin**.</string>
     <string name="WalletTestShareInvoiceUrlInfo">Share this link to receive **%1$s Toncoin**.</string>
@@ -126,19 +192,19 @@
     <string name="WalletConfirm">Confirm</string>
     <string name="WalletEnterPasscode">Enter passcode</string>
     <string name="WalletPasscodeLength">Your passcode contains %1$s.</string>
-    <string name="WalletSendingGrams">Sending Toncoin</string>
+    <string name="WalletSendingGrams">Sending TON</string>
     <string name="WalletSendingGramsInfo">Please wait a few seconds for your transaction to be processed...</string>
     <string name="WalletSendConfirmCredentials">Please confirm your credentials to send Toncoin.</string>
     <string name="WalletExportConfirmContinue">Please confirm your credentials to continue.</string>
     <string name="WalletExportConfirmCredentials">Please confirm your credentials to export your wallet.</string>
-    <string name="WalletExport">Export Wallet</string>
-    <string name="WalletDelete">Log Out</string>
+    <string name="WalletExport">Show recovery phrase</string>
+    <string name="WalletDelete">Delete Wallet</string>
     <string name="WalletSettings">Wallet Settings</string>
     <string name="WalletServerSettings">Server Settings</string>
     <string name="WalletChangePasscode">Change Passcode</string>
     <string name="WalletDeleteTitle">Log out</string>
     <string name="WalletKeystoreInvalidated">Unfortunately, your wallet is no longer available because of a change in your device\'s lockscreen parameters. Please use your secret words to restore the wallet.</string>
-    <string name="WalletPermissionNoCamera">Wallet needs access to your camera so that you can scan QR codes.</string>
+    <string name="WalletPermissionNoCamera">TON Wallet doesn’t have access to the camera. Please enable camera access to scan QR codes.</string>
     <string name="WalletSecurityAlertTitle">Security</string>
     <string name="WalletSecurityAlertTextBiometric">For better security, we recommend you to set up lockscreen biometric authentication.</string>
     <string name="WalletSecurityAlertTextLockscreenBiometric">For better security, we recommend you to set up a lockscreen password and biometric authentication.</string>
@@ -155,14 +221,19 @@
     <string name="WalletSendBalance">Balance: %1$s</string>
     <string name="WalletShareQr">Share QR</string>
     <string name="WalletTransaction">Transaction</string>
+    <string name="WalletTransactionShowInExplorer">View in explorer</string>
+    <string name="WalletTransactionDetails">Details</string>
     <string name="WalletTransactionComment">Comment</string>
-    <string name="WalletTransactionRecipient">Recipient</string>
-    <string name="WalletTransactionSender">Sender</string>
-    <string name="WalletTransactionSendGrams">Send Toncoin to this Address</string>
+    <string name="WalletTransactionRecipientDomain">Recipient</string>
+    <string name="WalletTransactionRecipient">Recipient address</string>
+    <string name="WalletTransactionSender">Sender address</string>
+    <string name="WalletTransactionSendGrams">Send TON to this address</string>
+    <string name="WalletTransactionSendX">Send %1$s to this address</string>
     <string name="WalletTransactionAddressCopied">Address copied to clipboard</string>
     <string name="WalletStorageFee">%1$s storage fee</string>
     <string name="WalletTransactionFee">%1$s transaction fee</string>
     <string name="WalletBlockchainFees">%1$s blockchain fees</string>
+    <string name="WalletBalnceChanges">%1$s TON</string>
     <string name="WalletInsufficientGramsTitle">Insufficient Toncoin</string>
     <string name="WalletInsufficientGramsText">Unfortunately, your transfer couldn\'t be complrted. You don\'t have enough Toncoin.</string>
     <string name="WalletSendSameWalletText">Sending Toncoin from a wallet to the same wallet doesn\'t make sense, you will simply waste a portion of the value on blockchain fees.</string>
@@ -192,7 +263,7 @@
     <string name="WalletBlockchainConfigInvalid">Sorry, this config is invalid.</string>
     <string name="WalletCreateBlockchainConfigLoadError">App was unable to load blockchain config. Please make sure that you have an active Internet connection.</string>
     <string name="WalletSendSyncInProgress">Please wait while the wallet finishes syncing with the TON Blockchain.</string>
-    <string name="GramWalletInfo">The Toncoin Wallet allows you to make fast and secure blockchain-based payments without intermediaries.</string>
+    <string name="GramWalletInfo">TON Wallet allows you to make fast and secure blockchain-based payments without intermediaries.</string>
     <string name="WalletDeleteInfo">This will disconnect the wallet from this app. You will be able to restore your wallet using 24 secret words – or import another wallet.\n\nWallets are located in the decentralized TON Blockchain. If you want a wallet to be deleted, simply transfer all the Toncoin from it and leave it empty.</string>
     <string name="WalletEncryptedMessage">Encrypted message</string>
     <string name="WalletDecryptConfirmCredentials">Please confirm your credentials to decrypt transactions messages.</string>
@@ -237,6 +308,8 @@
     <string name="Days_many">%1$d days</string>
     <string name="Days_other">%1$d days</string>
     <!--date formatters-->
+    <string name="formatterTransactionTime12H">MMM dd, yyyy \'at\' h:mm a</string>
+    <string name="formatterTransactionTime24H">MMM dd, yyyy \'at\' HH:mm</string>
     <string name="formatterStats12H">MMM dd yyyy, h:mm a</string>
     <string name="formatterStats24H">MMM dd yyyy, HH:mm</string>
     <string name="formatterBannedUntil12H">MMM dd yyyy, h:mm a</string>
@@ -262,4 +335,22 @@
     <string name="RemindTodayAt">\'Remind today at\' HH:mm</string>
     <string name="RemindDayAt">\'Remind on\' MMM d \'at\' HH:mm</string>
     <string name="RemindDayYearAt">\'Remind on\' MMM d yyyy \'at\' HH:mm</string>
+
+
+
+    <string name="WalletTransactionAction">Action</string>
+    <string name="WalletTransactionActionUnknown">Unknown payload</string>
+    <string name="WalletTransactionActionNftTransfer">NFT transfer</string>
+    <string name="WalletTransactionActionNftReceive">NFT receive</string>
+    <string name="WalletTransactionActionJettonTransfer">Token transfer</string>
+    <string name="WalletTransactionActionExcesses">Excesses</string>
+    <string name="WalletTransactionActionJettonReceive">Token receive</string>
+    <string name="WalletTransactionActionJettonBurn">Token burn</string>
+    <string name="WalletTransactionActionDeploy">Contract deploy</string>
+
+    <string name="WalletRootTokenAddress">Root token contract address</string>
+    <string name="WalletEnterRootTokenAddress">Enter root token contract address</string>
+
+    <string name="WalletWaitingForNetwork">Waiting for network...</string>
+
 </resources>

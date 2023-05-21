@@ -7,10 +7,13 @@
 
 package org.telegram.ui.Components;
 
+import android.content.Context;
+import android.util.TypedValue;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import org.telegram.messenger.AndroidUtilities;
 
@@ -141,5 +144,26 @@ public class LayoutHelper {
 
     public static LinearLayout.LayoutParams createLinear(int width, int height) {
         return new LinearLayout.LayoutParams(getSize(width), getSize(height));
+    }
+
+    public static TextView createTextView (Context context, int fontSize) {
+        return createTextView(context, fontSize, -1, 0, -1);
+    }
+
+    public static TextView createTextView (Context context, int fontSize, int lineHeight) {
+        return createTextView(context, fontSize, lineHeight, 0, -1);
+    }
+
+    public static TextView createTextView (Context context, int fontSize, int lineHeight, int color, int maxLines) {
+        TextView textView = new TextView(context);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, fontSize);
+        textView.setTextColor(color);
+        if (maxLines != -1) {
+            textView.setMaxLines(maxLines);
+        }
+        if (lineHeight != -1) {
+            textView.setLineSpacing(AndroidUtilities.dp((lineHeight - fontSize) / 2f), 1);
+        }
+        return textView;
     }
 }

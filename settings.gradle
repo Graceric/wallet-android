@@ -1,2 +1,11 @@
-include ':app'
+include (
+        ':app',
+        ":neodiX42:ton4j:utils",
+        ":neodiX42:ton4j:address",
+        ":neodiX42:ton4j:bitstring",
+        ":neodiX42:ton4j:cell",
+        // ":vkryl:leveldb",
+        ":vkryl:android",
+        ":vkryl:core"
+)
 rootProject.name='Wallet'

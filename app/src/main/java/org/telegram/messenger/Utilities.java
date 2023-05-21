@@ -7,25 +7,52 @@
 
 package org.telegram.messenger;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
+import android.os.Build;
+import android.text.TextUtils;
+import android.util.Base64;
+import android.view.View;
+import android.widget.ImageView;
+
+import androidx.core.content.FileProvider;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
+import org.ton.java.address.Address;
+import org.ton.java.cell.Cell;
+import org.ton.java.cell.CellSlice;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
+import java.io.FileOutputStream;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import drinkless.org.ton.TonApi;
+
 public class Utilities {
 
+    public final static int MAX_ACCOUNT_COUNT = 1;
     public static Pattern pattern = Pattern.compile("[\\-0-9]+");
     public static SecureRandom random = new SecureRandom();
 
-    public static volatile DispatchQueue stageQueue = new DispatchQueue("stageQueue");
     public static volatile DispatchQueue globalQueue = new DispatchQueue("globalQueue");
     public static volatile DispatchQueue searchQueue = new DispatchQueue("searchQueue");
-    public static volatile DispatchQueue phoneBookQueue = new DispatchQueue("phoneBookQueue");
 
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    public static int selectedAccount;
 
     static {
         try {
@@ -40,19 +67,19 @@ public class Utilities {
         }
     }
 
-    private native static void aesIgeEncryption(ByteBuffer buffer, byte[] key, byte[] iv, boolean encrypt, int offset, int length);
-    private native static void aesIgeEncryptionByteArray(byte[] buffer, byte[] key, byte[] iv, boolean encrypt, int offset, int length);
-    private native static int pbkdf2(byte[] password, byte[] salt, byte[] dst, int iterations);
+    private native static void aesIgeEncryptionByteArray (byte[] buffer, byte[] key, byte[] iv, boolean encrypt, int offset, int length);
 
-    public static void aesIgeEncryption(ByteBuffer buffer, byte[] key, byte[] iv, boolean encrypt, boolean changeIv, int offset, int length) {
-        aesIgeEncryption(buffer, key, changeIv ? iv : iv.clone(), encrypt, offset, length);
-    }
+    private native static int pbkdf2 (byte[] password, byte[] salt, byte[] dst, int iterations);
 
-    public static void aesIgeEncryptionByteArray(byte[] buffer, byte[] key, byte[] iv, boolean encrypt, boolean changeIv, int offset, int length) {
+    public native static int signEd25519hash (byte[] hash, byte[] privateKey, byte[] result);
+
+    public native static int privateToPublicX25519 (byte[] privateKey, byte[] result);
+
+    public static void aesIgeEncryptionByteArray (byte[] buffer, byte[] key, byte[] iv, boolean encrypt, boolean changeIv, int offset, int length) {
         aesIgeEncryptionByteArray(buffer, key, changeIv ? iv : iv.clone(), encrypt, offset, length);
     }
 
-    public static Integer parseInt(CharSequence value) {
+    public static Integer parseInt (CharSequence value) {
         if (value == null) {
             return 0;
         }
@@ -69,7 +96,7 @@ public class Utilities {
         return val;
     }
 
-    public static Long parseLong(String value) {
+    public static Long parseLong (String value) {
         if (value == null) {
             return 0L;
         }
@@ -86,93 +113,208 @@ public class Utilities {
         return val;
     }
 
-    public static String parseIntToString(String value) {
-        Matcher matcher = pattern.matcher(value);
-        if (matcher.find()) {
-            return matcher.group(0);
+    public static byte[] computePBKDF2 (byte[] password, byte[] salt) {
+        byte[] dst = new byte[64];
+        Utilities.pbkdf2(password, salt, dst, 100000);
+        return dst;
+    }
+
+    public static byte[] publicKeyToBytes (String publicKey) {
+        return Arrays.copyOfRange(Base64.decode(publicKey, Base64.URL_SAFE), 2, 34);
+    }
+
+    public static String truncateString (String inputString, int n, int k) {
+        if (inputString == null || inputString.length() <= n + k) {
+            return inputString;
+        }
+        String firstNChars = inputString.substring(0, n);
+        String lastNChars = inputString.substring(inputString.length() - k);
+        return firstNChars + "..." + lastNChars;
+    }
+
+    @Deprecated
+    public static CharSequence formatCurrency (Long value) {
+        if (value == null) return "";
+        if (value == 0) {
+            return "0";
+        }
+        String sign = value < 0 ? "-" : "";
+        StringBuilder builder = new StringBuilder(String.format(Locale.US, "%s%d.%09d", sign, Math.abs(value / 1000000000L), Math.abs(value % 1000000000)));
+        while (builder.length() > 1 && builder.charAt(builder.length() - 1) == '0' && builder.charAt(builder.length() - 2) != '.') {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        return builder;
+    }
+
+    public static Bitmap createTonQR (Context context, String key, Bitmap oldBitmap) {
+        try {
+            HashMap<EncodeHintType, Object> hints = new HashMap<>();
+            hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);
+            hints.put(EncodeHintType.MARGIN, 0);
+            return new QRCodeWriter().encode(key, BarcodeFormat.QR_CODE, 768, 768, hints, oldBitmap, context);
+        } catch (Exception e) {
+            FileLog.e(e);
         }
         return null;
     }
 
-    public static String bytesToHex(byte[] bytes) {
-        if (bytes == null) {
-            return "";
+    public static void shareBitmap (Activity activity, View view, String text) {
+        try {
+            ImageView imageView = (ImageView) view;
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
+            File f = AndroidUtilities.getSharingDirectory();
+            f.mkdirs();
+            f = new File(f, "qr.jpg");
+            FileOutputStream outputStream = new FileOutputStream(f.getAbsolutePath());
+            bitmapDrawable.getBitmap().compress(Bitmap.CompressFormat.JPEG, 87, outputStream);
+            outputStream.close();
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("image/jpeg");
+            if (!TextUtils.isEmpty(text)) {
+                intent.putExtra(Intent.EXTRA_TEXT, text);
+            }
+            if (Build.VERSION.SDK_INT >= 24) {
+                try {
+                    intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(activity, BuildConfig.APPLICATION_ID + ".provider", f));
+                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (Exception ignore) {
+                    intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
+                }
+            } else {
+                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(f));
+            }
+            activity.startActivityForResult(Intent.createChooser(intent, LocaleController.getString("WalletShareQr", R.string.WalletShareQr)), 500);
+        } catch (Exception e) {
+            FileLog.e(e);
         }
-        char[] hexChars = new char[bytes.length * 2];
-        int v;
-        for (int j = 0; j < bytes.length; j++) {
-            v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
     }
 
-    public static byte[] hexToBytes(String hex) {
-        if (hex == null) {
+    public static boolean isValidTonDomain (String address) {
+        return address.length() > 7 && address.endsWith(".ton");
+    }
+
+    public static TonApi.Error getTonApiErrorSafe (Object error) {
+        if (error instanceof TonApi.Error) {
+            return (TonApi.Error) error;
+        }
+        return null;
+    }
+
+    public static TonApi.InternalTransactionId getLastTransactionId (TonApi.RawFullAccountState accountState) {
+        if (accountState == null) {
+            return new TonApi.InternalTransactionId(0, new byte[32]);
+        }
+        return accountState.lastTransactionId;
+    }
+
+    public static long getLastSyncTime (TonApi.RawFullAccountState accountState) {
+        return accountState.syncUtime;
+    }
+
+    public static byte[] reverse (byte[] arr) {
+        if (arr == null) {
             return null;
         }
-        int len = hex.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4) + Character.digit(hex.charAt(i + 1), 16));
+        byte[] array = new byte[arr.length];
+        System.arraycopy(arr, 0, array, 0, arr.length);
+        int i = 0;
+        int j = array.length - 1;
+        byte tmp;
+        while (j > i) {
+            tmp = array[j];
+            array[j] = array[i];
+            array[i] = tmp;
+            j--;
+            i++;
         }
-        return data;
+
+        return array;
     }
 
-    public static boolean isGoodPrime(byte[] prime, int g) {
-        if (!(g >= 2 && g <= 7)) {
-            return false;
+    public static boolean isEmptyTransaction (TonApi.RawTransaction transaction) {
+        long value = 0;
+        boolean hasMessage = false;
+        boolean emptySource = true;
+        if (transaction.inMsg != null) {
+            value += transaction.inMsg.value;
+            if (!(transaction.inMsg.msgData instanceof TonApi.MsgDataRaw)) {
+                hasMessage = true;
+            }
+            emptySource = TextUtils.isEmpty(transaction.inMsg.source.accountAddress);
         }
-
-        if (prime.length != 256 || prime[0] >= 0) {
-            return false;
-        }
-
-        BigInteger dhBI = new BigInteger(1, prime);
-
-        if (g == 2) { // p mod 8 = 7 for g = 2;
-            BigInteger res = dhBI.mod(BigInteger.valueOf(8));
-            if (res.intValue() != 7) {
-                return false;
-            }
-        } else if (g == 3) { // p mod 3 = 2 for g = 3;
-            BigInteger res = dhBI.mod(BigInteger.valueOf(3));
-            if (res.intValue() != 2) {
-                return false;
-            }
-        } else if (g == 5) { // p mod 5 = 1 or 4 for g = 5;
-            BigInteger res = dhBI.mod(BigInteger.valueOf(5));
-            int val = res.intValue();
-            if (val != 1 && val != 4) {
-                return false;
-            }
-        } else if (g == 6) { // p mod 24 = 19 or 23 for g = 6;
-            BigInteger res = dhBI.mod(BigInteger.valueOf(24));
-            int val = res.intValue();
-            if (val != 19 && val != 23) {
-                return false;
-            }
-        } else if (g == 7) { // p mod 7 = 3, 5 or 6 for g = 7.
-            BigInteger res = dhBI.mod(BigInteger.valueOf(7));
-            int val = res.intValue();
-            if (val != 3 && val != 5 && val != 6) {
-                return false;
+        if (transaction.outMsgs != null && transaction.outMsgs.length > 0) {
+            for (int a = 0; a < transaction.outMsgs.length; a++) {
+                value -= transaction.outMsgs[a].value;
+                if (!(transaction.outMsgs[a].msgData instanceof TonApi.MsgDataRaw)) {
+                    hasMessage = true;
+                }
             }
         }
-
-        String hex = bytesToHex(prime);
-        if (hex.equals("C71CAEB9C6B1C9048E6C522F70F13F73980D40238E3E21C14934D037563D930F48198A0AA7C14058229493D22530F4DBFA336F6E0AC925139543AED44CCE7C3720FD51F69458705AC68CD4FE6B6B13ABDC9746512969328454F18FAF8C595F642477FE96BB2A941D5BCD1D4AC8CC49880708FA9B378E3C4F3A9060BEE67CF9A4A4A695811051907E162753B56B0F6B410DBA74D8A84B2A14B3144E0EF1284754FD17ED950D5965B4B9DD46582DB1178D169C6BC465B0D6FF9CA3928FEF5B9AE4E418FC15E83EBEA0F87FA9FF5EED70050DED2849F47BF959D956850CE929851F0D8115F635B105EE2E4E15D04B2454BF6F4FADF034B10403119CD8E3B92FCC5B")) {
-            return true;
-        }
-
-        BigInteger dhBI2 = dhBI.subtract(BigInteger.valueOf(1)).divide(BigInteger.valueOf(2));
-        return !(!dhBI.isProbablePrime(30) || !dhBI2.isProbablePrime(30));
+        return !hasMessage && emptySource && value == 0;
     }
 
-    public static byte[] computePBKDF2(byte[] password, byte[] salt) {
-        byte[] dst = new byte[64];
-        Utilities.pbkdf2(password, salt, dst, 100000);
-        return dst;
+    public static String normalizeAddress (Address address) {
+        if (address == null) return null;
+        return normalizeAddress(address.toString());
+    }
+
+    public static String normalizeAddress (String address) {
+        return new Address(address.replaceAll("\n", "")).toString(true, true, true, false).replaceAll("\n", "");
+    }
+
+    public static boolean isValidWalletAddress (String address) {
+        return Address.isValid(address);
+    }
+
+    public static byte[] nonNull (byte[] bytes) {
+        if (bytes == null) {
+            return new byte[0];
+        } else {
+            return bytes;
+        }
+    }
+
+    public static boolean isEmpty (Object[] arr) {
+        return arr == null || arr.length == 0;
+    }
+
+    public static boolean isEmpty (byte[] arr) {
+        return arr == null || arr.length == 0;
+    }
+
+    public static byte[] randomBytes (int n) {
+        byte[] bytes = new byte[n];
+        Utilities.random.nextBytes(bytes);
+        return bytes;
+    }
+
+    public static String getDateKey (long timeInMillis) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeInMillis);
+        int dateDay = calendar.get(Calendar.DAY_OF_YEAR);
+        int dateYear = calendar.get(Calendar.YEAR);
+        int dateMonth = calendar.get(Calendar.MONTH);
+        return String.format(Locale.US, "%d_%02d_%02d", dateYear, dateMonth, dateDay);
+    }
+
+    public static String fixUrl (String url) {
+        if (url.startsWith("ipfs://")) {
+            return url.replace("ipfs://", "https://ipfs.io/ipfs/");
+        }
+        return url;
+    }
+
+
+    public static String getAddressFromTmvCell (TonApi.TvmStackEntry entry) {
+        try {
+            final byte[] addressBytes = (entry instanceof TonApi.TvmStackEntrySlice) ?
+                ((TonApi.TvmStackEntrySlice) entry).slice.bytes :
+                ((TonApi.TvmStackEntryCell) entry).cell.bytes;
+            Address address = CellSlice.beginParse(Cell.deserializeBoc(addressBytes)).loadAddress();
+            return address != null ? normalizeAddress(address.toString(true)) : null;
+        } catch (Throwable e) {
+            return null;
+        }
     }
 }

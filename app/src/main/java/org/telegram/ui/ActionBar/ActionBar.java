@@ -1,8 +1,9 @@
 /*
- * This is the source code of Wallet for Android v. 1.0.
+ * This is the source code of Telegram for Android v. 5.x.x.
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
- * Copyright Nikolai Kudashov, 2019-2020.
+ *
+ * Copyright Nikolai Kudashov, 2013-2018.
  */
 
 package org.telegram.ui.ActionBar;
@@ -14,22 +15,30 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.transition.ChangeBounds;
+import android.transition.Fade;
+import android.transition.TransitionManager;
+import android.transition.TransitionSet;
+import android.transition.TransitionValues;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
+import org.telegram.ui.Components.CubicBezierInterpolator;
+import org.telegram.ui.Components.EllipsizeSpanAnimator;
 import org.telegram.ui.Components.LayoutHelper;
 
 import java.util.ArrayList;
@@ -47,17 +56,24 @@ public class ActionBar extends FrameLayout {
     }
 
     private ImageView backButtonImageView;
-    private SimpleTextView titleTextView;
+    private Drawable backButtonDrawable;
+    private SimpleTextView[] titleTextView = new SimpleTextView[2];
     private SimpleTextView subtitleTextView;
+    private SimpleTextView additionalSubtitleTextView;
     private View actionModeTop;
-    private ActionBarMenu menu;
+    private int actionModeColor;
+    private int actionBarColor;
+    private boolean isMenuOffsetSuppressed;
+    public ActionBarMenu menu;
     private ActionBarMenu actionMode;
+    private String actionModeTag;
     private boolean ignoreLayoutRequest;
     private boolean occupyStatusBar = Build.VERSION.SDK_INT >= 21;
     private boolean actionModeVisible;
     private boolean addToContainer = true;
     private boolean clipContent;
     private boolean interceptTouches = true;
+    private boolean forceSkipTouches;
     private int extraHeight;
     private AnimatorSet actionModeAnimation;
     private View actionModeExtraView;
@@ -65,15 +81,15 @@ public class ActionBar extends FrameLayout {
     private View actionModeShowingView;
     private View[] actionModeHidingViews;
 
-    private Paint.FontMetricsInt fontMetricsInt;
-    private boolean manualStart;
-    private Rect rect;
-
     private int titleRightMargin;
 
     private boolean allowOverlayTitle;
     private CharSequence lastTitle;
+    private Drawable lastRightDrawable;
+    private CharSequence lastOverlayTitle;
+    private Object[] overlayTitleToSet = new Object[3];
     private Runnable lastRunnable;
+    private boolean titleOverlayShown;
     private Runnable titleActionRunnable;
     private boolean castShadows = true;
 
@@ -82,9 +98,16 @@ public class ActionBar extends FrameLayout {
     protected int itemsActionModeBackgroundColor;
     protected int itemsColor;
     protected int itemsActionModeColor;
-    private boolean isBackOverlayVisible;
     protected BaseFragment parentFragment;
     public ActionBarMenuOnItemClick actionBarMenuOnItemClick;
+    private int titleColorToSet = 0;
+    private boolean overlayTitleAnimation;
+    private boolean titleAnimationRunning;
+    private boolean fromBottom;
+    private boolean centerScale;
+    private CharSequence subtitle;
+
+    EllipsizeSpanAnimator ellipsizeSpanAnimator = new EllipsizeSpanAnimator(this);
 
     public ActionBar(Context context) {
         super(context);
@@ -123,12 +146,16 @@ public class ActionBar extends FrameLayout {
         backButtonImageView.setContentDescription(LocaleController.getString("AccDescrGoBack", R.string.AccDescrGoBack));
     }
 
+    public Drawable getBackButtonDrawable() {
+        return backButtonDrawable;
+    }
+
     public void setBackButtonDrawable(Drawable drawable) {
         if (backButtonImageView == null) {
             createBackButtonImage();
         }
         backButtonImageView.setVisibility(drawable == null ? GONE : VISIBLE);
-        backButtonImageView.setImageDrawable(drawable);
+        backButtonImageView.setImageDrawable(backButtonDrawable = drawable);
         if (drawable instanceof BackDrawable) {
             BackDrawable backDrawable = (BackDrawable) drawable;
             backDrawable.setRotation(isActionModeShowed() ? 1 : 0, false);
@@ -143,9 +170,13 @@ public class ActionBar extends FrameLayout {
         }
     }
 
+    protected boolean shouldClipChild(View child) {
+        return clipContent && (child == titleTextView[0] || child == titleTextView[1] || child == subtitleTextView || child == menu || child == backButtonImageView || child == additionalSubtitleTextView);
+    }
+
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        boolean clip = clipContent && (child == titleTextView || child == subtitleTextView || child == actionMode || child == menu || child == backButtonImageView);
+        boolean clip = shouldClipChild(child);
         if (clip) {
             canvas.save();
             canvas.clipRect(0, -getTranslationY() + (occupyStatusBar ? AndroidUtilities.statusBarHeight : 0), getMeasuredWidth(), getMeasuredHeight());
@@ -180,8 +211,23 @@ public class ActionBar extends FrameLayout {
         subtitleTextView = new SimpleTextView(getContext());
         subtitleTextView.setGravity(Gravity.LEFT);
         subtitleTextView.setVisibility(GONE);
-        subtitleTextView.setTextColor(Theme.getColor(Theme.key_actionBarDefaultSubtitle));
+        subtitleTextView.setTextColor(getThemedColor(Theme.key_actionBarDefaultSubtitle));
         addView(subtitleTextView, 0, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP));
+    }
+
+    public void createAdditionalSubtitleTextView() {
+        if (additionalSubtitleTextView != null) {
+            return;
+        }
+        additionalSubtitleTextView = new SimpleTextView(getContext());
+        additionalSubtitleTextView.setGravity(Gravity.LEFT);
+        additionalSubtitleTextView.setVisibility(GONE);
+        additionalSubtitleTextView.setTextColor(getThemedColor(Theme.key_actionBarDefaultSubtitle));
+        addView(additionalSubtitleTextView, 0, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP));
+    }
+
+    public SimpleTextView getAdditionalSubtitleTextView() {
+        return additionalSubtitleTextView;
     }
 
     public void setAddToContainer(boolean value) {
@@ -201,20 +247,32 @@ public class ActionBar extends FrameLayout {
             createSubtitleTextView();
         }
         if (subtitleTextView != null) {
-            subtitleTextView.setVisibility(!TextUtils.isEmpty(value) && !isSearchFieldVisible ? VISIBLE : GONE);
-            subtitleTextView.setText(value);
+            boolean isEmpty = TextUtils.isEmpty(value);
+            subtitleTextView.setVisibility(!isEmpty && !isSearchFieldVisible ? VISIBLE : GONE);
+            subtitleTextView.setAlpha(1f);
+            if (!isEmpty) {
+                subtitleTextView.setText(value);
+            }
+            subtitle = value;
         }
     }
 
-    private void createTitleTextView() {
-        if (titleTextView != null) {
+    private void createTitleTextView(int i) {
+        if (titleTextView[i] != null) {
             return;
         }
-        titleTextView = new SimpleTextView(getContext());
-        titleTextView.setGravity(Gravity.LEFT);
-        titleTextView.setTextColor(Theme.getColor(Theme.key_actionBarDefaultTitle));
-        titleTextView.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
-        addView(titleTextView, 0, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP));
+        titleTextView[i] = new SimpleTextView(getContext());
+        titleTextView[i].setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
+        if (titleColorToSet != 0) {
+            titleTextView[i].setTextColor(titleColorToSet);
+        } else {
+            titleTextView[i].setTextColor(getThemedColor(Theme.key_actionBarDefaultTitle));
+        }
+        titleTextView[i].setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        titleTextView[i].setDrawablePadding(AndroidUtilities.dp(4));
+        // titleTextView[i].setPadding(0, AndroidUtilities.dp(8), 0, AndroidUtilities.dp(8));
+        titleTextView[i].setRightDrawableTopPadding(-AndroidUtilities.dp(1));
+        addView(titleTextView[i], 0, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP));
     }
 
     public void setTitleRightMargin(int value) {
@@ -222,21 +280,30 @@ public class ActionBar extends FrameLayout {
     }
 
     public void setTitle(CharSequence value) {
-        if (value != null && titleTextView == null) {
-            createTitleTextView();
+        setTitle(value, null);
+    }
+
+    public void setTitle(CharSequence value, Drawable rightDrawable) {
+        if (value != null && titleTextView[0] == null) {
+            createTitleTextView(0);
         }
-        if (titleTextView != null) {
-            lastTitle = value;
-            titleTextView.setVisibility(value != null && !isSearchFieldVisible ? VISIBLE : INVISIBLE);
-            titleTextView.setText(value);
+        if (titleTextView[0] != null) {
+            titleTextView[0].setVisibility(value != null && !isSearchFieldVisible ? VISIBLE : INVISIBLE);
+            titleTextView[0].setText(lastTitle = value);
+            titleTextView[0].setRightDrawable(lastRightDrawable = rightDrawable);
         }
+        fromBottom = false;
     }
 
     public void setTitleColor(int color) {
-        if (titleTextView == null) {
-            createTitleTextView();
+        if (titleTextView[0] == null) {
+            createTitleTextView(0);
         }
-        titleTextView.setTextColor(color);
+        titleColorToSet = color;
+        titleTextView[0].setTextColor(color);
+        if (titleTextView[1] != null) {
+            titleTextView[1].setTextColor(color);
+        }
     }
 
     public void setSubtitleColor(int color) {
@@ -246,14 +313,22 @@ public class ActionBar extends FrameLayout {
         subtitleTextView.setTextColor(color);
     }
 
-    public void setPopupItemsColor(int color, boolean icon) {
-        if (menu != null) {
+    public void setTitleScrollNonFitText(boolean b) {
+        titleTextView[0].setScrollNonFitText(b);
+    }
+
+    public void setPopupItemsColor(int color, boolean icon, boolean forActionMode) {
+        if (forActionMode && actionMode != null) {
+            actionMode.setPopupItemsColor(color, icon);
+        } else if (!forActionMode && menu != null) {
             menu.setPopupItemsColor(color, icon);
         }
     }
 
-    public void setPopupBackgroundColor(int color) {
-        if (menu != null) {
+    public void setPopupBackgroundColor(int color, boolean forActionMode) {
+        if (forActionMode && actionMode != null) {
+            actionMode.redrawPopup(color);
+        } else if (!forActionMode && menu != null) {
             menu.redrawPopup(color);
         }
     }
@@ -263,21 +338,25 @@ public class ActionBar extends FrameLayout {
     }
 
     public SimpleTextView getTitleTextView() {
-        return titleTextView;
+        return titleTextView[0];
+    }
+
+    public SimpleTextView getTitleTextView2() {
+        return titleTextView[1];
     }
 
     public String getTitle() {
-        if (titleTextView == null) {
+        if (titleTextView[0] == null) {
             return null;
         }
-        return titleTextView.getText().toString();
+        return titleTextView[0].getText().toString();
     }
 
     public String getSubtitle() {
-        if (subtitleTextView == null) {
+        if (subtitleTextView == null || subtitle == null) {
             return null;
         }
-        return subtitleTextView.getText().toString();
+        return subtitle.toString();
     }
 
     public ActionBarMenu createMenu() {
@@ -297,21 +376,40 @@ public class ActionBar extends FrameLayout {
         return actionBarMenuOnItemClick;
     }
 
-    public View getBackButton() {
+    public ImageView getBackButton() {
         return backButtonImageView;
     }
 
     public ActionBarMenu createActionMode() {
-        return createActionMode(true);
+        return createActionMode(true, null);
     }
 
-    public ActionBarMenu createActionMode(boolean needTop) {
-        if (actionMode != null) {
+    public boolean actionModeIsExist(String tag) {
+        if (actionMode != null && ((actionModeTag == null && tag == null) || (actionModeTag != null && actionModeTag.equals(tag)))) {
+            return true;
+        }
+        return false;
+    }
+
+    public ActionBarMenu createActionMode(boolean needTop, String tag) {
+        if (actionModeIsExist(tag)) {
             return actionMode;
         }
-        actionMode = new ActionBarMenu(getContext(), this);
+        if (actionMode != null) {
+            removeView(actionMode);
+            actionMode = null;
+        }
+        actionModeTag = tag;
+        actionMode = new ActionBarMenu(getContext(), this) {
+            @Override
+            public void setBackgroundColor(int color) {
+                actionModeColor = color;
+                super.setBackgroundColor(actionModeColor);
+            }
+        };
         actionMode.isActionMode = true;
-        actionMode.setBackgroundColor(Theme.getColor(Theme.key_actionBarActionModeDefault));
+        actionMode.setClickable(true);
+        actionMode.setBackgroundColor(getThemedColor(Theme.key_actionBarActionModeDefault));
         addView(actionMode, indexOfChild(backButtonImageView));
         actionMode.setPadding(0, occupyStatusBar ? AndroidUtilities.statusBarHeight : 0, 0, 0);
         FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) actionMode.getLayoutParams();
@@ -322,106 +420,163 @@ public class ActionBar extends FrameLayout {
         actionMode.setLayoutParams(layoutParams);
         actionMode.setVisibility(INVISIBLE);
 
-        if (occupyStatusBar && needTop && actionModeTop == null) {
-            actionModeTop = new View(getContext());
-            actionModeTop.setBackgroundColor(Theme.getColor(Theme.key_actionBarActionModeDefaultTop));
-            addView(actionModeTop);
-            layoutParams = (FrameLayout.LayoutParams) actionModeTop.getLayoutParams();
-            layoutParams.height = AndroidUtilities.statusBarHeight;
-            layoutParams.width = LayoutHelper.MATCH_PARENT;
-            layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
-            actionModeTop.setLayoutParams(layoutParams);
-            actionModeTop.setVisibility(INVISIBLE);
-        }
+//        if (occupyStatusBar && needTop && actionModeTop == null && !blurredBackground) {
+//            actionModeTop = new View(getContext());
+//            actionModeTop.setBackgroundColor(getThemedColor(Theme.key_actionBarActionModeDefaultTop));
+//            addView(actionModeTop);
+//            layoutParams = (FrameLayout.LayoutParams) actionModeTop.getLayoutParams();
+//            layoutParams.height = AndroidUtilities.statusBarHeight;
+//            layoutParams.width = LayoutHelper.MATCH_PARENT;
+//            layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
+//            actionModeTop.setLayoutParams(layoutParams);
+//            actionModeTop.setVisibility(INVISIBLE);
+//        }
 
         return actionMode;
     }
 
     public void showActionMode() {
-        showActionMode(null, null, null, null, null, 0);
+        showActionMode(true, null, null, null, null, null, 0);
     }
 
-    public void showActionMode(View extraView, View showingView, View[] hidingViews, final boolean[] hideView, View translationView, int translation) {
+    public void showActionMode(boolean animated) {
+        showActionMode(animated, null, null, null, null, null, 0);
+    }
+
+    public void showActionMode(boolean animated, View extraView, View showingView, View[] hidingViews, boolean[] hideView, View translationView, int translation) {
         if (actionMode == null || actionModeVisible) {
             return;
         }
         actionModeVisible = true;
-        ArrayList<Animator> animators = new ArrayList<>();
-        animators.add(ObjectAnimator.ofFloat(actionMode, View.ALPHA, 0.0f, 1.0f));
-        if (hidingViews != null) {
-            for (int a = 0; a < hidingViews.length; a++) {
-                if (hidingViews[a] != null) {
-                    animators.add(ObjectAnimator.ofFloat(hidingViews[a], View.ALPHA, 1.0f, 0.0f));
+        if (animated) {
+            ArrayList<Animator> animators = new ArrayList<>();
+            animators.add(ObjectAnimator.ofFloat(actionMode, View.ALPHA, 0.0f, 1.0f));
+            if (hidingViews != null) {
+                for (int a = 0; a < hidingViews.length; a++) {
+                    if (hidingViews[a] != null) {
+                        animators.add(ObjectAnimator.ofFloat(hidingViews[a], View.ALPHA, 1.0f, 0.0f));
+                    }
                 }
             }
-        }
-        if (showingView != null) {
-            animators.add(ObjectAnimator.ofFloat(showingView, View.ALPHA, 0.0f, 1.0f));
-        }
-        if (translationView != null) {
-            animators.add(ObjectAnimator.ofFloat(translationView, View.TRANSLATION_Y, translation));
-            actionModeTranslationView = translationView;
-        }
-        actionModeExtraView = extraView;
-        actionModeShowingView = showingView;
-        actionModeHidingViews = hidingViews;
-        if (occupyStatusBar && actionModeTop != null) {
-            animators.add(ObjectAnimator.ofFloat(actionModeTop, View.ALPHA, 0.0f, 1.0f));
-        }
-        if (actionModeAnimation != null) {
-            actionModeAnimation.cancel();
-        }
-        actionModeAnimation = new AnimatorSet();
-        actionModeAnimation.playTogether(animators);
-        actionModeAnimation.setDuration(200);
-        actionModeAnimation.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-                actionMode.setVisibility(VISIBLE);
-                if (occupyStatusBar && actionModeTop != null) {
-                    actionModeTop.setVisibility(VISIBLE);
-                }
+            if (showingView != null) {
+                animators.add(ObjectAnimator.ofFloat(showingView, View.ALPHA, 0.0f, 1.0f));
             }
+            if (translationView != null) {
+                animators.add(ObjectAnimator.ofFloat(translationView, View.TRANSLATION_Y, translation));
+                actionModeTranslationView = translationView;
+            }
+            actionModeExtraView = extraView;
+            actionModeShowingView = showingView;
+            actionModeHidingViews = hidingViews;
+            if (occupyStatusBar && actionModeTop != null) {
+                animators.add(ObjectAnimator.ofFloat(actionModeTop, View.ALPHA, 0.0f, 1.0f));
+            }
+            if (actionModeAnimation != null) {
+                actionModeAnimation.cancel();
+            }
+            actionModeAnimation = new AnimatorSet();
+            actionModeAnimation.playTogether(animators);
+            actionModeAnimation.setDuration(200);
+            actionModeAnimation.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    actionMode.setVisibility(VISIBLE);
+                    if (occupyStatusBar && actionModeTop != null) {
+                        actionModeTop.setVisibility(VISIBLE);
+                    }
+                }
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (actionModeAnimation != null && actionModeAnimation.equals(animation)) {
-                    actionModeAnimation = null;
-                    if (titleTextView != null) {
-                        titleTextView.setVisibility(INVISIBLE);
-                    }
-                    if (subtitleTextView != null && !TextUtils.isEmpty(subtitleTextView.getText())) {
-                        subtitleTextView.setVisibility(INVISIBLE);
-                    }
-                    if (menu != null) {
-                        menu.setVisibility(INVISIBLE);
-                    }
-                    if (actionModeHidingViews != null) {
-                        for (int a = 0; a < actionModeHidingViews.length; a++) {
-                            if (actionModeHidingViews[a] != null) {
-                                if (hideView == null || a >= hideView.length || hideView[a]) {
-                                    actionModeHidingViews[a].setVisibility(INVISIBLE);
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (actionModeAnimation != null && actionModeAnimation.equals(animation)) {
+                        actionModeAnimation = null;
+                        if (titleTextView[0] != null) {
+                            titleTextView[0].setVisibility(INVISIBLE);
+                        }
+                        if (subtitleTextView != null && !TextUtils.isEmpty(subtitle)) {
+                            subtitleTextView.setVisibility(INVISIBLE);
+                        }
+                        if (menu != null) {
+                            menu.setVisibility(INVISIBLE);
+                        }
+                        if (actionModeHidingViews != null) {
+                            for (int a = 0; a < actionModeHidingViews.length; a++) {
+                                if (actionModeHidingViews[a] != null) {
+                                    if (hideView == null || a >= hideView.length || hideView[a]) {
+                                        actionModeHidingViews[a].setVisibility(INVISIBLE);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                if (actionModeAnimation != null && actionModeAnimation.equals(animation)) {
-                    actionModeAnimation = null;
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    if (actionModeAnimation != null && actionModeAnimation.equals(animation)) {
+                        actionModeAnimation = null;
+                    }
+                }
+            });
+            actionModeAnimation.start();
+            if (backButtonImageView != null) {
+                Drawable drawable = backButtonImageView.getDrawable();
+                if (drawable instanceof BackDrawable) {
+                    ((BackDrawable) drawable).setRotation(1, true);
+                }
+                backButtonImageView.setBackgroundDrawable(Theme.createSelectorDrawable(itemsActionModeBackgroundColor));
+            }
+        } else {
+            actionMode.setAlpha(1.0f);
+            if (hidingViews != null) {
+                for (int a = 0; a < hidingViews.length; a++) {
+                    if (hidingViews[a] != null) {
+                        hidingViews[a].setAlpha(0.0f);
+                    }
                 }
             }
-        });
-        actionModeAnimation.start();
-        if (backButtonImageView != null) {
-            Drawable drawable = backButtonImageView.getDrawable();
-            if (drawable instanceof BackDrawable) {
-                ((BackDrawable) drawable).setRotation(1, true);
+            if (showingView != null) {
+                showingView.setAlpha(1.0f);
             }
-            backButtonImageView.setBackground(Theme.createSelectorDrawable(itemsActionModeBackgroundColor));
+            if (translationView != null) {
+                translationView.setTranslationY(translation);
+                actionModeTranslationView = translationView;
+            }
+            actionModeExtraView = extraView;
+            actionModeShowingView = showingView;
+            actionModeHidingViews = hidingViews;
+            if (occupyStatusBar && actionModeTop != null) {
+                actionModeTop.setAlpha(1.0f);
+            }
+            actionMode.setVisibility(VISIBLE);
+            if (occupyStatusBar && actionModeTop != null) {
+                actionModeTop.setVisibility(VISIBLE);
+            }
+            if (titleTextView[0] != null) {
+                titleTextView[0].setVisibility(INVISIBLE);
+            }
+            if (subtitleTextView != null && !TextUtils.isEmpty(subtitle)) {
+                subtitleTextView.setVisibility(INVISIBLE);
+            }
+            if (menu != null) {
+                menu.setVisibility(INVISIBLE);
+            }
+            if (actionModeHidingViews != null) {
+                for (int a = 0; a < actionModeHidingViews.length; a++) {
+                    if (actionModeHidingViews[a] != null) {
+                        if (hideView == null || a >= hideView.length || hideView[a]) {
+                            actionModeHidingViews[a].setVisibility(INVISIBLE);
+                        }
+                    }
+                }
+            }
+            if (backButtonImageView != null) {
+                Drawable drawable = backButtonImageView.getDrawable();
+                if (drawable instanceof BackDrawable) {
+                    ((BackDrawable) drawable).setRotation(1, false);
+                }
+                backButtonImageView.setBackgroundDrawable(Theme.createSelectorDrawable(itemsActionModeBackgroundColor));
+            }
         }
     }
 
@@ -435,8 +590,10 @@ public class ActionBar extends FrameLayout {
         animators.add(ObjectAnimator.ofFloat(actionMode, View.ALPHA, 0.0f));
         if (actionModeHidingViews != null) {
             for (int a = 0; a < actionModeHidingViews.length; a++) {
-                actionModeHidingViews[a].setVisibility(VISIBLE);
-                animators.add(ObjectAnimator.ofFloat(actionModeHidingViews[a], View.ALPHA, 1.0f));
+                if (actionModeHidingViews[a] != null) {
+                    actionModeHidingViews[a].setVisibility(VISIBLE);
+                    animators.add(ObjectAnimator.ofFloat(actionModeHidingViews[a], View.ALPHA, 1.0f));
+                }
             }
         }
         if (actionModeTranslationView != null) {
@@ -479,10 +636,10 @@ public class ActionBar extends FrameLayout {
         });
         actionModeAnimation.start();
         if (!isSearchFieldVisible) {
-            if (titleTextView != null) {
-                titleTextView.setVisibility(VISIBLE);
+            if (titleTextView[0] != null) {
+                titleTextView[0].setVisibility(VISIBLE);
             }
-            if (subtitleTextView != null && !TextUtils.isEmpty(subtitleTextView.getText())) {
+            if (subtitleTextView != null && !TextUtils.isEmpty(subtitle)) {
                 subtitleTextView.setVisibility(VISIBLE);
             }
         }
@@ -494,14 +651,14 @@ public class ActionBar extends FrameLayout {
             if (drawable instanceof BackDrawable) {
                 ((BackDrawable) drawable).setRotation(0, true);
             }
-            backButtonImageView.setBackground(Theme.createSelectorDrawable(itemsBackgroundColor));
+            backButtonImageView.setBackgroundDrawable(Theme.createSelectorDrawable(itemsBackgroundColor));
         }
     }
 
     public void showActionModeTop() {
         if (occupyStatusBar && actionModeTop == null) {
             actionModeTop = new View(getContext());
-            actionModeTop.setBackgroundColor(Theme.getColor(Theme.key_actionBarActionModeDefaultTop));
+            actionModeTop.setBackgroundColor(getThemedColor(Theme.key_actionBarActionModeDefaultTop));
             addView(actionModeTop);
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) actionModeTop.getLayoutParams();
             layoutParams.height = AndroidUtilities.statusBarHeight;
@@ -533,14 +690,69 @@ public class ActionBar extends FrameLayout {
         return actionMode != null && actionModeVisible;
     }
 
+    public boolean isActionModeShowed(String tag) {
+        return actionMode != null && actionModeVisible && ((actionModeTag == null && tag == null) || (actionModeTag != null && actionModeTag.equals(tag)));
+    }
+
+    AnimatorSet searchVisibleAnimator;
+
     public void onSearchFieldVisibilityChanged(boolean visible) {
         isSearchFieldVisible = visible;
-        if (titleTextView != null) {
-            titleTextView.setVisibility(visible ? INVISIBLE : VISIBLE);
+        if (searchVisibleAnimator != null) {
+            searchVisibleAnimator.cancel();
         }
-        if (subtitleTextView != null && !TextUtils.isEmpty(subtitleTextView.getText())) {
+        searchVisibleAnimator = new AnimatorSet();
+        final ArrayList<View> viewsToHide = new ArrayList<>();
+
+        if (titleTextView[0] != null) {
+            viewsToHide.add(titleTextView[0]);
+        }
+
+        if (subtitleTextView != null && !TextUtils.isEmpty(subtitle)) {
+            viewsToHide.add(subtitleTextView);
             subtitleTextView.setVisibility(visible ? INVISIBLE : VISIBLE);
         }
+
+        for (int i = 0; i < viewsToHide.size(); i++) {
+            View view = viewsToHide.get(i);
+            if (!visible) {
+                view.setVisibility(View.VISIBLE);
+                view.setAlpha(0);
+                view.setScaleX(0.95f);
+                view.setScaleY(0.95f);
+            }
+            searchVisibleAnimator.playTogether(ObjectAnimator.ofFloat(view, View.ALPHA, visible ? 0f : 1f));
+            searchVisibleAnimator.playTogether(ObjectAnimator.ofFloat(view, View.SCALE_Y, visible ? 0.95f : 1f));
+            searchVisibleAnimator.playTogether(ObjectAnimator.ofFloat(view, View.SCALE_X, visible ? 0.95f : 1f));
+        }
+        centerScale = true;
+        requestLayout();
+        searchVisibleAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                for (int i = 0; i < viewsToHide.size(); i++) {
+                    View view = viewsToHide.get(i);
+                    if (visible) {
+                        view.setVisibility(View.INVISIBLE);
+                        view.setAlpha(0);
+                    } else {
+                        view.setAlpha(1f);
+                    }
+                }
+
+                if (visible) {
+                    if (titleTextView[0] != null) {
+                        titleTextView[0].setVisibility(View.GONE);
+                    }
+                    if (titleTextView[1] != null) {
+                        titleTextView[1].setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
+
+        searchVisibleAnimator.setDuration(150).start();
+
         Drawable drawable = backButtonImageView.getDrawable();
         if (drawable instanceof MenuDrawable) {
             MenuDrawable menuDrawable = (MenuDrawable) drawable;
@@ -577,7 +789,14 @@ public class ActionBar extends FrameLayout {
         if (menu == null || text == null) {
             return;
         }
-        menu.openSearchField(!isSearchFieldVisible, text, animated);
+        menu.openSearchField(!isSearchFieldVisible, !isSearchFieldVisible, text, animated);
+    }
+
+    public void openSearchField(boolean animated) {
+        if (menu == null) {
+            return;
+        }
+        menu.openSearchField(!isSearchFieldVisible, false, "", animated);
     }
 
     public void setSearchFieldText(String text) {
@@ -639,45 +858,90 @@ public class ActionBar extends FrameLayout {
 
         if (menu != null && menu.getVisibility() != GONE) {
             int menuWidth;
-            if (isSearchFieldVisible) {
+            boolean searchFieldIsVisible = menu.searchFieldVisible();
+            if (searchFieldIsVisible && !this.isSearchFieldVisible) {
+                menuWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST);
+                menu.measure(menuWidth, actionBarHeightSpec);
+                int itemsWidth = menu.getItemsMeasuredWidth();
+                menuWidth = MeasureSpec.makeMeasureSpec(width - AndroidUtilities.dp(AndroidUtilities.isTablet() ? 74 : 66) + menu.getItemsMeasuredWidth(), MeasureSpec.EXACTLY);
+                if (!isMenuOffsetSuppressed) {
+                    menu.translateXItems(-itemsWidth);
+                }
+            } else if (isSearchFieldVisible) {
                 menuWidth = MeasureSpec.makeMeasureSpec(width - AndroidUtilities.dp(AndroidUtilities.isTablet() ? 74 : 66), MeasureSpec.EXACTLY);
+                if (!isMenuOffsetSuppressed) {
+                    menu.translateXItems(0);
+                }
             } else {
                 menuWidth = MeasureSpec.makeMeasureSpec(width, MeasureSpec.AT_MOST);
+                if (!isMenuOffsetSuppressed) {
+                    menu.translateXItems(0);
+                }
             }
             menu.measure(menuWidth, actionBarHeightSpec);
+
         }
 
-        if (titleTextView != null && titleTextView.getVisibility() != GONE || subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
-            int availableWidth = width - (menu != null ? menu.getMeasuredWidth() : 0) - AndroidUtilities.dp(16) - textLeft - titleRightMargin;
+        for (int i = 0; i < 2; i++) {
+            if (titleTextView[0] != null && titleTextView[0].getVisibility() != GONE || subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
+                int availableWidth = width - (menu != null ? menu.getMeasuredWidth() : 0) - AndroidUtilities.dp(16) - textLeft - titleRightMargin;
 
-            if (titleTextView != null && titleTextView.getVisibility() != GONE && subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
-                titleTextView.setTextSize(AndroidUtilities.isTablet() ? 20 : 18);
-                subtitleTextView.setTextSize(AndroidUtilities.isTablet() ? 16 : 14);
-            } else {
-                if (titleTextView != null && titleTextView.getVisibility() != GONE) {
-                    titleTextView.setTextSize(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 18 : 20);
+                if (((fromBottom && i == 0) || (!fromBottom && i == 1)) && overlayTitleAnimation && titleAnimationRunning) {
+                    titleTextView[i].setTextSize(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 18 : 20);
+                } else {
+                    if (titleTextView[0] != null && titleTextView[0].getVisibility() != GONE && subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
+                        if (titleTextView[i] != null) {
+                            titleTextView[i].setTextSize(AndroidUtilities.isTablet() ? 20 : 18);
+                        }
+                        subtitleTextView.setTextSize(AndroidUtilities.isTablet() ? 16 : 14);
+                        if (additionalSubtitleTextView != null) {
+                            additionalSubtitleTextView.setTextSize(AndroidUtilities.isTablet() ? 16 : 14);
+                        }
+                    } else {
+                        if (titleTextView[i] != null && titleTextView[i].getVisibility() != GONE) {
+                            titleTextView[i].setTextSize(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 18 : 20);
+                        }
+                        if (subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
+                            subtitleTextView.setTextSize(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 14 : 16);
+                        }
+                        if (additionalSubtitleTextView != null) {
+                            additionalSubtitleTextView.setTextSize(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 14 : 16);
+                        }
+                    }
+                }
+
+                if (titleTextView[i] != null && titleTextView[i].getVisibility() != GONE) {
+                    titleTextView[i].measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(24) + titleTextView[i].getPaddingTop() + titleTextView[i].getPaddingBottom(), MeasureSpec.AT_MOST));
+                    if (centerScale) {
+                        CharSequence text = titleTextView[i].getText();
+                        titleTextView[i].setPivotX(titleTextView[i].getTextPaint().measureText(text, 0, text.length()) / 2f);
+                        titleTextView[i].setPivotY((AndroidUtilities.dp(24) >> 1));
+                    } else {
+                        titleTextView[i].setPivotX(0);
+                        titleTextView[i].setPivotY(0);
+                    }
                 }
                 if (subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
-                    subtitleTextView.setTextSize(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 14 : 16);
+                    subtitleTextView.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(20), MeasureSpec.AT_MOST));
                 }
-            }
-
-            if (titleTextView != null && titleTextView.getVisibility() != GONE) {
-                titleTextView.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(24), MeasureSpec.AT_MOST));
-            }
-            if (subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
-                subtitleTextView.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(20), MeasureSpec.AT_MOST));
+                if (additionalSubtitleTextView != null && additionalSubtitleTextView.getVisibility() != GONE) {
+                    additionalSubtitleTextView.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(AndroidUtilities.dp(20), MeasureSpec.AT_MOST));
+                }
             }
         }
 
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE || child == titleTextView || child == subtitleTextView || child == menu || child == backButtonImageView) {
+            if (child.getVisibility() == GONE || child == titleTextView[0] || child == titleTextView[1] || child == subtitleTextView || child == menu || child == backButtonImageView || child == additionalSubtitleTextView) {
                 continue;
             }
             measureChildWithMargins(child, widthMeasureSpec, 0, MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY), 0);
         }
+    }
+
+    public void setMenuOffsetSuppressed(boolean menuOffsetSuppressed) {
+        isMenuOffsetSuppressed = menuOffsetSuppressed;
     }
 
     @Override
@@ -693,28 +957,39 @@ public class ActionBar extends FrameLayout {
         }
 
         if (menu != null && menu.getVisibility() != GONE) {
-            int menuLeft = isSearchFieldVisible ? AndroidUtilities.dp(AndroidUtilities.isTablet() ? 74 : 66) : (right - left) - menu.getMeasuredWidth();
+            int menuLeft = menu.searchFieldVisible() ? AndroidUtilities.dp(AndroidUtilities.isTablet() ? 74 : 66) : (right - left) - menu.getMeasuredWidth();
             menu.layout(menuLeft, additionalTop, menuLeft + menu.getMeasuredWidth(), additionalTop + menu.getMeasuredHeight());
         }
 
-        if (titleTextView != null && titleTextView.getVisibility() != GONE) {
-            int textTop;
-            if (subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
-                textTop = (getCurrentActionBarHeight() / 2 - titleTextView.getTextHeight()) / 2 + AndroidUtilities.dp(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 2 : 3);
-            } else {
-                textTop = (getCurrentActionBarHeight() - titleTextView.getTextHeight()) / 2;
+        for (int i = 0; i < 2; i++) {
+            if (titleTextView[i] != null && titleTextView[i].getVisibility() != GONE) {
+                int textTop;
+                if (((fromBottom && i == 0) || (!fromBottom && i == 1)) && overlayTitleAnimation && titleAnimationRunning) {
+                    textTop = (getCurrentActionBarHeight() - titleTextView[i].getTextHeight()) / 2;
+                } else {
+                    if ((subtitleTextView != null && subtitleTextView.getVisibility() != GONE)) {
+                        textTop = (getCurrentActionBarHeight() / 2 - titleTextView[i].getTextHeight()) / 2 + AndroidUtilities.dp(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 2 : 3);
+                    } else {
+                        textTop = (getCurrentActionBarHeight() - titleTextView[i].getTextHeight()) / 2;
+                    }
+                }
+                titleTextView[i].layout(textLeft, additionalTop + textTop - titleTextView[i].getPaddingTop(), textLeft + titleTextView[i].getMeasuredWidth(), additionalTop + textTop + titleTextView[i].getTextHeight() - titleTextView[i].getPaddingTop() + titleTextView[i].getPaddingBottom());
             }
-            titleTextView.layout(textLeft, additionalTop + textTop, textLeft + titleTextView.getMeasuredWidth(), additionalTop + textTop + titleTextView.getTextHeight());
         }
         if (subtitleTextView != null && subtitleTextView.getVisibility() != GONE) {
             int textTop = getCurrentActionBarHeight() / 2 + (getCurrentActionBarHeight() / 2 - subtitleTextView.getTextHeight()) / 2 - AndroidUtilities.dp(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 1 : 1);
             subtitleTextView.layout(textLeft, additionalTop + textTop, textLeft + subtitleTextView.getMeasuredWidth(), additionalTop + textTop + subtitleTextView.getTextHeight());
         }
 
+        if (additionalSubtitleTextView != null && additionalSubtitleTextView.getVisibility() != GONE) {
+            int textTop = getCurrentActionBarHeight() / 2 + (getCurrentActionBarHeight() / 2 - additionalSubtitleTextView.getTextHeight()) / 2 - AndroidUtilities.dp(!AndroidUtilities.isTablet() && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? 1 : 1);
+            additionalSubtitleTextView.layout(textLeft, additionalTop + textTop, textLeft + additionalSubtitleTextView.getMeasuredWidth(), additionalTop + textTop + additionalSubtitleTextView.getTextHeight());
+        }
+
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
-            if (child.getVisibility() == GONE || child == titleTextView || child == subtitleTextView || child == menu || child == backButtonImageView) {
+            if (child.getVisibility() == GONE || child == titleTextView[0] || child == titleTextView[1] || child == subtitleTextView || child == menu || child == backButtonImageView || child == additionalSubtitleTextView) {
                 continue;
             }
 
@@ -782,17 +1057,93 @@ public class ActionBar extends FrameLayout {
         lastRunnable = titleActionRunnable = action;
     }
 
+    boolean overlayTitleAnimationInProgress;
+
     public void setTitleOverlayText(String title, int titleId, Runnable action) {
         if (!allowOverlayTitle || parentFragment.parentLayout == null) {
             return;
         }
-        CharSequence textToSet = title != null ? LocaleController.getString(title, titleId) : lastTitle;
-        if (textToSet != null && titleTextView == null) {
-            createTitleTextView();
+        overlayTitleToSet[0] = title;
+        overlayTitleToSet[1] = titleId;
+        overlayTitleToSet[2] = action;
+        if (overlayTitleAnimationInProgress) {
+            return;
         }
-        if (titleTextView != null) {
-            titleTextView.setVisibility(textToSet != null && !isSearchFieldVisible ? VISIBLE : INVISIBLE);
-            titleTextView.setText(textToSet);
+        if (lastOverlayTitle == null && title == null || (lastOverlayTitle != null && lastOverlayTitle.equals(title))) {
+            return;
+        }
+        lastOverlayTitle = title;
+
+        CharSequence textToSet = title != null ? LocaleController.getString(title, titleId): lastTitle;
+
+        Drawable rightDrawableToSet = title != null ? null : lastRightDrawable;
+        boolean ellipsize = false;
+        if (title != null) {
+            int index = TextUtils.indexOf(textToSet, "...");
+            if (index >= 0) {
+                SpannableString spannableString = SpannableString.valueOf(textToSet);
+                ellipsizeSpanAnimator.wrap(spannableString, index);
+                textToSet = spannableString;
+                ellipsize = true;
+            }
+        }
+        titleOverlayShown = title != null;
+        if ((textToSet != null && titleTextView[0] == null) || getMeasuredWidth() == 0 || (titleTextView[0] != null && titleTextView[0].getVisibility() != View.VISIBLE)) {
+            createTitleTextView(0);
+            titleTextView[0].setText(textToSet);
+            titleTextView[0].setDrawablePadding(AndroidUtilities.dp(4));
+            titleTextView[0].setRightDrawable(rightDrawableToSet);
+            if (ellipsize) {
+                ellipsizeSpanAnimator.addView(titleTextView[0]);
+            } else {
+                ellipsizeSpanAnimator.removeView(titleTextView[0]);
+            }
+        } else if (titleTextView[0] != null) {
+            titleTextView[0].animate().cancel();
+            if (titleTextView[1] != null) {
+                titleTextView[1].animate().cancel();
+            }
+            if (titleTextView[1] == null) {
+                createTitleTextView(1);
+            }
+            titleTextView[1].setText(textToSet);
+            titleTextView[1].setDrawablePadding(AndroidUtilities.dp(4));
+            titleTextView[1].setRightDrawable(rightDrawableToSet);
+            if (ellipsize) {
+                ellipsizeSpanAnimator.addView(titleTextView[1]);
+            }
+            overlayTitleAnimationInProgress = true;
+            SimpleTextView tmp = titleTextView[1];
+            titleTextView[1] = titleTextView[0];
+            titleTextView[0] = tmp;
+            titleTextView[0].setAlpha(0);
+            titleTextView[0].setTranslationY(-AndroidUtilities.dp(20));
+            titleTextView[0].animate()
+                .alpha(1f)
+                .translationY(0)
+                .setDuration(220).start();
+            ViewPropertyAnimator animator = titleTextView[1].animate()
+                .alpha(0);
+            if (subtitleTextView == null) {
+                animator.translationY(AndroidUtilities.dp(20));
+            } else {
+                animator.scaleY(0.7f).scaleX(0.7f);
+            }
+            requestLayout();
+            centerScale = true;
+            animator.setDuration(220).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (titleTextView[1] != null && titleTextView[1].getParent() != null) {
+                        ViewGroup viewGroup = (ViewGroup) titleTextView[1].getParent();
+                        viewGroup.removeView(titleTextView[1]);
+                    }
+                    ellipsizeSpanAnimator.removeView(titleTextView[1]);
+                    titleTextView[1] = null;
+                    overlayTitleAnimationInProgress = false;
+                    setTitleOverlayText((String) overlayTitleToSet[0], (int) overlayTitleToSet[1], (Runnable) overlayTitleToSet[2]);
+                }
+            }).start();
         }
         titleActionRunnable = action != null ? action : lastRunnable;
     }
@@ -817,7 +1168,7 @@ public class ActionBar extends FrameLayout {
             itemsActionModeBackgroundColor = color;
             if (actionModeVisible) {
                 if (backButtonImageView != null) {
-                    backButtonImageView.setBackground(Theme.createSelectorDrawable(itemsActionModeBackgroundColor));
+                    backButtonImageView.setBackgroundDrawable(Theme.createSelectorDrawable(itemsActionModeBackgroundColor));
                 }
             }
             if (actionMode != null) {
@@ -826,7 +1177,7 @@ public class ActionBar extends FrameLayout {
         } else {
             itemsBackgroundColor = color;
             if (backButtonImageView != null) {
-                backButtonImageView.setBackground(Theme.createSelectorDrawable(itemsBackgroundColor));
+                backButtonImageView.setBackgroundDrawable(Theme.createSelectorDrawable(itemsBackgroundColor));
             }
             if (menu != null) {
                 menu.updateItemsBackgroundColor();
@@ -873,6 +1224,9 @@ public class ActionBar extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (forceSkipTouches) {
+            return false;
+        }
         return super.onTouchEvent(event) || interceptTouches;
     }
 
@@ -886,8 +1240,157 @@ public class ActionBar extends FrameLayout {
         }
     }
 
+    public void setTitleAnimated(CharSequence title, boolean fromBottom, long duration) {
+        if (titleTextView[0] == null || title == null) {
+            setTitle(title);
+            return;
+        }
+        boolean crossfade = overlayTitleAnimation && !TextUtils.isEmpty(subtitle);
+        if (crossfade) {
+            if (subtitleTextView.getVisibility() != View.VISIBLE) {
+                subtitleTextView.setVisibility(View.VISIBLE);
+                subtitleTextView.setAlpha(0);
+            }
+            subtitleTextView.animate().alpha(fromBottom ? 0 : 1f).setDuration(220).start();
+        }
+        if (titleTextView[1] != null) {
+            if (titleTextView[1].getParent() != null) {
+                ViewGroup viewGroup = (ViewGroup) titleTextView[1].getParent();
+                viewGroup.removeView(titleTextView[1]);
+            }
+            titleTextView[1] = null;
+        }
+        titleTextView[1] = titleTextView[0];
+        titleTextView[0] = null;
+        setTitle(title);
+        this.fromBottom = fromBottom;
+        titleTextView[0].setAlpha(0);
+        if (!crossfade) {
+            titleTextView[0].setTranslationY(fromBottom ? AndroidUtilities.dp(20) : -AndroidUtilities.dp(20));
+        }
+        titleTextView[0].animate().alpha(1f).translationY(0).setDuration(duration).start();
+
+        titleAnimationRunning = true;
+        ViewPropertyAnimator a = titleTextView[1].animate().alpha(0);
+        if (!crossfade) {
+            a.translationY(fromBottom ? -AndroidUtilities.dp(20) : AndroidUtilities.dp(20));
+        }
+        a.setDuration(duration).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (titleTextView[1] != null && titleTextView[1].getParent() != null) {
+                    ViewGroup viewGroup = (ViewGroup) titleTextView[1].getParent();
+                    viewGroup.removeView(titleTextView[1]);
+                }
+                titleTextView[1] = null;
+                titleAnimationRunning = false;
+
+                if (crossfade && fromBottom) {
+                    subtitleTextView.setVisibility(View.GONE);
+                }
+
+                requestLayout();
+            }
+        }).start();
+        requestLayout();
+    }
+
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        ellipsizeSpanAnimator.onAttachedToWindow();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        ellipsizeSpanAnimator.onDetachedFromWindow();
+    }
+
+    public ActionBarMenu getActionMode() {
+        return actionMode;
+    }
+
+    public void setOverlayTitleAnimation(boolean ovelayTitleAnimation) {
+        this.overlayTitleAnimation = ovelayTitleAnimation;
+    }
+
+    public void beginDelayedTransition() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            TransitionSet transitionSet = new TransitionSet();
+            transitionSet.setOrdering(TransitionSet.ORDERING_TOGETHER);
+            transitionSet.addTransition(new Fade());
+            transitionSet.addTransition(new ChangeBounds() {
+
+
+                public void captureStartValues(TransitionValues transitionValues) {
+                    super.captureStartValues(transitionValues);
+                    if (transitionValues.view instanceof SimpleTextView) {
+                        float textSize = ((SimpleTextView) transitionValues.view).getTextPaint().getTextSize();
+                        transitionValues.values.put("text_size", textSize);
+                    }
+                }
+
+                public void captureEndValues(TransitionValues transitionValues) {
+                    super.captureEndValues(transitionValues);
+                    if (transitionValues.view instanceof SimpleTextView) {
+                        float textSize= ((SimpleTextView) transitionValues.view).getTextPaint().getTextSize();
+                        transitionValues.values.put("text_size", textSize);
+                    }
+                }
+
+                @Override
+                public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues, TransitionValues endValues) {
+                    if (startValues != null && startValues.view instanceof SimpleTextView) {
+                        AnimatorSet animatorSet = new AnimatorSet();
+                        if (startValues != null && endValues != null) {
+                            Animator animator = super.createAnimator(sceneRoot, startValues, endValues);
+                            float s = (float) startValues.values.get("text_size") / (float) endValues.values.get("text_size");
+                            startValues.view.setScaleX(s);
+                            startValues.view.setScaleY(s);
+                            if (animator != null) {
+                                animatorSet.playTogether(animator);
+                            }
+                        }
+                        animatorSet.playTogether(ObjectAnimator.ofFloat(startValues.view, SCALE_X, 1f));
+                        animatorSet.playTogether(ObjectAnimator.ofFloat(startValues.view, SCALE_Y, 1f));
+                        animatorSet.addListener(new AnimatorListenerAdapter() {
+
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+                                super.onAnimationStart(animation);
+                                startValues.view.setLayerType(LAYER_TYPE_HARDWARE, null);
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                                startValues.view.setLayerType(LAYER_TYPE_NONE, null);
+                            }
+                        });
+                        return animatorSet;
+                    } else {
+                        return super.createAnimator(sceneRoot, startValues, endValues);
+                    }
+                }
+            });
+            centerScale = false;
+            transitionSet.setDuration(220);
+            transitionSet.setInterpolator(CubicBezierInterpolator.DEFAULT);
+            TransitionManager.beginDelayedTransition(this, transitionSet);
+        }
+    }
+
+    private int getThemedColor(String key) {
+        return Theme.getColor(key);
+    }
+
+    public void setForceSkipTouches(boolean forceSkipTouches) {
+        this.forceSkipTouches = forceSkipTouches;
     }
 }

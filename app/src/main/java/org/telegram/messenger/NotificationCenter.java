@@ -7,8 +7,9 @@
 
 package org.telegram.messenger;
 
-import androidx.annotation.UiThread;
 import android.util.SparseArray;
+
+import androidx.annotation.UiThread;
 
 import java.util.ArrayList;
 
@@ -18,6 +19,11 @@ public class NotificationCenter {
 
     public static final int walletPendingTransactionsChanged = totalEvents++;
     public static final int walletSyncProgressChanged = totalEvents++;
+    public static final int walletChangeWalletVersion = totalEvents++;
+    public static final int walletChangeRootJettonAddress = totalEvents++;
+
+    public static final int coingeckoPricesUpdated = totalEvents++;
+    public static final int hasNetworkConnectionUpdated = totalEvents++;
 
     public static final int cameraInitied = totalEvents++;
     public static final int stopAllHeavyOperations = totalEvents++;
@@ -50,7 +56,7 @@ public class NotificationCenter {
 
     private int currentAccount;
     private int currentHeavyOperationFlags;
-    private static volatile NotificationCenter[] Instance = new NotificationCenter[UserConfig.MAX_ACCOUNT_COUNT];
+    private static volatile NotificationCenter[] Instance = new NotificationCenter[Utilities.MAX_ACCOUNT_COUNT];
     private static volatile NotificationCenter globalInstance;
 
     @UiThread

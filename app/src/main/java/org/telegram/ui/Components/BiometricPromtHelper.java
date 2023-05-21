@@ -116,7 +116,7 @@ public class BiometricPromtHelper {
             cancellationSignal = new CancellationSignal();
 
             Context context = parentFragment.getParentActivity();
-            BottomSheet.Builder builder = new BottomSheet.Builder(context);
+            BottomSheet.Builder builder = new BottomSheet.Builder(parentFragment);
             builder.setUseFullWidth(false);
             builder.setApplyTopPadding(false);
             builder.setApplyBottomPadding(false);
@@ -392,6 +392,33 @@ public class BiometricPromtHelper {
             builder.setNegativeButton(continueButton, (dialog, which) -> callback.run(false));
             fragment.showDialog(builder.create());
         }
+    }
+
+    public static boolean askForBiometricIfNoBiometricEnrolled (BaseFragment fragment) {
+        if (fragment.getParentActivity() == null) return false;
+
+        if (!BiometricPromtHelper.hasBiometricEnrolled()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getParentActivity());
+            builder.setTitle(LocaleController.getString("WalletBiometricAuth", R.string.WalletBiometricAuth));
+            builder.setMessage(LocaleController.getString("WalletNotFoundFingerprint", R.string.WalletNotFoundFingerprint));
+            builder.setPositiveButton(LocaleController.getString("WalletSecurityAlertSetup", R.string.WalletSecurityAlertSetup), (dialog, which) -> {
+                try {
+                    if (Build.VERSION.SDK_INT >= 28) {
+                        fragment.getParentActivity().startActivity(new Intent(Settings.ACTION_FINGERPRINT_ENROLL));
+                    } else {
+                        fragment.getParentActivity().startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
+                    }
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+            });
+            builder.setNegativeButton(LocaleController.getString("Cancel", R.string.Cancel), (dialog, which) -> {});
+            fragment.showDialog(builder.create());
+
+            return false;
+        }
+
+        return true;
     }
 
     final static String[] badBiometricModels = new String[]{

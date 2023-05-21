@@ -1,8 +1,9 @@
 /*
- * This is the source code of Wallet for Android v. 1.0.
+ * This is the source code of Telegram for Android v. 5.x.x.
  * It is licensed under GNU GPL v. 2 or later.
  * You should have received a copy of the license in this archive (see LICENSE).
- * Copyright Nikolai Kudashov, 2019-2020.
+ *
+ * Copyright Nikolai Kudashov, 2013-2018.
  */
 
 package org.telegram.ui.ActionBar;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.telegram.messenger.AndroidUtilities;
+import org.telegram.ui.Components.RLottieDrawable;
 
 public class ActionBarMenu extends LinearLayout {
 
@@ -35,7 +37,7 @@ public class ActionBarMenu extends LinearLayout {
         for (int a = 0; a < count; a++) {
             View view = getChildAt(a);
             if (view instanceof ActionBarMenuItem) {
-                view.setBackground(Theme.createSelectorDrawable(isActionMode ? parentActionBar.itemsActionModeBackgroundColor : parentActionBar.itemsBackgroundColor));
+                view.setBackgroundDrawable(Theme.createSelectorDrawable(isActionMode ? parentActionBar.itemsActionModeBackgroundColor : parentActionBar.itemsBackgroundColor));
             }
         }
     }
@@ -119,23 +121,19 @@ public class ActionBarMenu extends LinearLayout {
     }
 
     protected void setPopupItemsColor(int color, boolean icon) {
-        int count = getChildCount();
-        for (int a = 0; a < count; a++) {
-            View view = getChildAt(a);
+        for (int a = 0, count = getChildCount(); a < count; a++) {
+            final View view = getChildAt(a);
             if (view instanceof ActionBarMenuItem) {
-                ActionBarMenuItem item = (ActionBarMenuItem) view;
-                item.setPopupItemsColor(color, icon);
+                ((ActionBarMenuItem) view).setPopupItemsColor(color, icon);
             }
         }
     }
 
     protected void redrawPopup(int color) {
-        int count = getChildCount();
-        for (int a = 0; a < count; a++) {
-            View view = getChildAt(a);
+        for (int a = 0, count = getChildCount(); a < count; a++) {
+            final View view = getChildAt(a);
             if (view instanceof ActionBarMenuItem) {
-                ActionBarMenuItem item = (ActionBarMenuItem) view;
-                item.redrawPopup(color);
+                ((ActionBarMenuItem) view).redrawPopup(color);
             }
         }
     }
@@ -214,7 +212,6 @@ public class ActionBarMenu extends LinearLayout {
                 if (item.isSearchField()) {
                     item.setSearchFieldText(text, false);
                     item.getSearchField().setSelection(text.length());
-                    break;
                 }
             }
         }
@@ -228,13 +225,12 @@ public class ActionBarMenu extends LinearLayout {
                 ActionBarMenuItem item = (ActionBarMenuItem) view;
                 if (item.isSearchField()) {
                     item.onSearchPressed();
-                    break;
                 }
             }
         }
     }
 
-    public void openSearchField(boolean toggle, String text, boolean animated) {
+    public void openSearchField(boolean toggle, boolean showKeyboard, String text, boolean animated) {
         int count = getChildCount();
         for (int a = 0; a < count; a++) {
             View view = getChildAt(a);
@@ -242,7 +238,7 @@ public class ActionBarMenu extends LinearLayout {
                 ActionBarMenuItem item = (ActionBarMenuItem) view;
                 if (item.isSearchField()) {
                     if (toggle) {
-                        parentActionBar.onSearchFieldVisibilityChanged(item.toggleSearch(true));
+                        parentActionBar.onSearchFieldVisibilityChanged(item.toggleSearch(showKeyboard));
                     }
                     item.setSearchFieldText(text, animated);
                     item.getSearchField().setSelection(text.length());
@@ -268,5 +264,53 @@ public class ActionBarMenu extends LinearLayout {
             View view = getChildAt(a);
             view.setEnabled(enabled);
         }
+    }
+
+    public int getItemsMeasuredWidth() {
+        int w = 0;
+        int count = getChildCount();
+        for (int a = 0; a < count; a++) {
+            View view = getChildAt(a);
+            if (view instanceof ActionBarMenuItem) {
+                w += view.getMeasuredWidth();
+            }
+        }
+        return w;
+    }
+
+    public int getVisibleItemsMeasuredWidth() {
+        int w = 0;
+        for (int i = 0, count = getChildCount(); i < count; i++) {
+            View view = getChildAt(i);
+            if (view instanceof ActionBarMenuItem && view.getVisibility() != View.GONE) {
+                w += view.getMeasuredWidth();
+            }
+        }
+        return w;
+    }
+
+    public boolean searchFieldVisible() {
+        int count = getChildCount();
+        for (int a = 0; a < count; a++) {
+            View view = getChildAt(a);
+            if (view instanceof ActionBarMenuItem && ((ActionBarMenuItem) view).getSearchContainer() != null && ((ActionBarMenuItem) view).getSearchContainer().getVisibility() == View.VISIBLE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void translateXItems(float offset) {
+        int count = getChildCount();
+        for (int a = 0; a < count; a++) {
+            View view = getChildAt(a);
+            if (view instanceof ActionBarMenuItem) {
+                ((ActionBarMenuItem) view).setTransitionOffset(offset);
+            }
+        }
+    }
+
+    public void clearSearchFilters() {
+
     }
 }

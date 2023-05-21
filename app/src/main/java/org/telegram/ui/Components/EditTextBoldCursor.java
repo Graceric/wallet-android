@@ -15,12 +15,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.SystemClock;
-import androidx.annotation.Keep;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -34,6 +33,8 @@ import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.annotation.Keep;
 
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.FileLog;
@@ -81,6 +82,7 @@ public class EditTextBoldCursor extends EditText {
     private StaticLayout hintLayout;
     private StaticLayout errorLayout;
     private CharSequence errorText;
+    private boolean isHintCenter;
     private int hintColor;
     private int headerHintColor;
     private boolean hintVisible = true;
@@ -492,7 +494,10 @@ public class EditTextBoldCursor extends EditText {
             if (lineLeft != 0) {
                 left -= lineLeft;
             }
-            if (supportRtlHint && LocaleController.isRTL) {
+            /*if (isHintCenter) {
+                float offset = (getMeasuredWidth() - hintWidth) / 2;
+                canvas.translate(left + getScrollX() + offset, lineY - hintLayout.getHeight() - AndroidUtilities.dp(6));
+            } else*/ if (supportRtlHint && LocaleController.isRTL) {
                 float offset = getMeasuredWidth() - hintWidth;
                 canvas.translate(left + getScrollX() + offset, lineY - hintLayout.getHeight() - AndroidUtilities.dp(6));
             } else {
@@ -585,6 +590,11 @@ public class EditTextBoldCursor extends EditText {
             errorLayout.draw(canvas);
             canvas.restore();
         }*/
+    }
+
+    public void setHintCenter(boolean hintCenter) {
+        isHintCenter = hintCenter;
+        invalidate();
     }
 
     public void setWindowView(View view) {

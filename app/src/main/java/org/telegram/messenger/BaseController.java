@@ -7,6 +7,8 @@
 
 package org.telegram.messenger;
 
+import org.TonController.TonController;
+
 public class BaseController {
 
     protected int currentAccount;
@@ -21,12 +23,8 @@ public class BaseController {
         return parentAccountInstance;
     }
 
-    protected final NotificationCenter getNotificationCenter() {
+    public final NotificationCenter getNotificationCenter() {
         return parentAccountInstance.getNotificationCenter();
-    }
-
-    protected final UserConfig getUserConfig() {
-        return parentAccountInstance.getUserConfig();
     }
 
     protected final TonController getTonController() {

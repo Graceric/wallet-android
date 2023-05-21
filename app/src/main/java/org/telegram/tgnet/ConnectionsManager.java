@@ -8,11 +8,11 @@
 package org.telegram.tgnet;
 
 import org.telegram.messenger.BaseController;
-import org.telegram.messenger.UserConfig;
+import org.telegram.messenger.Utilities;
 
 public class ConnectionsManager extends BaseController {
 
-    private static volatile ConnectionsManager[] Instance = new ConnectionsManager[UserConfig.MAX_ACCOUNT_COUNT];
+    private static volatile ConnectionsManager[] Instance = new ConnectionsManager[Utilities.MAX_ACCOUNT_COUNT];
     public static ConnectionsManager getInstance(int num) {
         ConnectionsManager localInstance = Instance[num];
         if (localInstance == null) {

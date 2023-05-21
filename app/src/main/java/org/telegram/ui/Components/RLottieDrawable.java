@@ -225,7 +225,7 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
                     }
                     nextRenderingBitmap = backgroundBitmap;
                     int framesPerUpdates = shouldLimitFps ? 2 : 1;
-                    if (currentFrame + framesPerUpdates < metaData[0]) {
+                    if (currentFrame + framesPerUpdates < (customEndFrame >= 0 ? customEndFrame : metaData[0])) {
                         if (autoRepeat == 3) {
                             nextFrameIsLast = true;
                             autoRepeatPlayCount++;
@@ -644,5 +644,15 @@ public class RLottieDrawable extends BitmapDrawable implements Animatable {
 
     public boolean hasBitmap() {
         return nativePtr != 0 && (renderingBitmap != null || nextRenderingBitmap != null);
+    }
+
+    protected int customEndFrame = -1;
+
+    public boolean setCustomEndFrame(int frame) {
+        if (customEndFrame == frame || frame > metaData[0]) {
+            return false;
+        }
+        customEndFrame = frame;
+        return true;
     }
 }

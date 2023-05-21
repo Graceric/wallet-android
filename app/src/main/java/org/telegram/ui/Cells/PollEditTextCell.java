@@ -76,7 +76,7 @@ public class PollEditTextCell extends FrameLayout {
         textView.setPadding(0, AndroidUtilities.dp(14), 0, AndroidUtilities.dp(14));
         textView.setImeOptions(textView.getImeOptions() | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
         textView.setInputType(textView.getInputType() | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL && onDelete != null ? 58 : 21, 0, !LocaleController.isRTL && onDelete != null ? 58 : 21, 0));
+        addView(textView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, (LocaleController.isRTL ? Gravity.RIGHT : Gravity.LEFT) | Gravity.CENTER_VERTICAL, LocaleController.isRTL && onDelete != null ? 58 : 20, 0, !LocaleController.isRTL && onDelete != null ? 58 : 20, 0));
 
         if (onDelete != null) {
             deleteImageView = new ImageView(context);

@@ -57,9 +57,6 @@ public class ApplicationLoader extends Application {
             e.printStackTrace();
         }
 
-        for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
-            UserConfig.getInstance(a).loadConfig();
-        }
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("app initied");
         }
