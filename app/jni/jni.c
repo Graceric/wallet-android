@@ -9,8 +9,9 @@
 #include <unistd.h>
 #include <dirent.h>
 
-int tonLibOnLoad(JavaVM *vm, JNIEnv *env);
 
+// int tonLibOnLoad(JavaVM *vm, JNIEnv *env);
+/*
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 	JNIEnv *env = 0;
     srand(time(NULL));
@@ -19,7 +20,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 		return -1;
 	}
         
-    tonLibOnLoad(vm, env);
+    // tonLibOnLoad(vm, env);
     
 	return JNI_VERSION_1_6;
 }
@@ -27,23 +28,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 void JNI_OnUnload(JavaVM *vm, void *reserved) {
 
 }
-
-JNIEXPORT void Java_org_telegram_messenger_Utilities_aesIgeEncryption(JNIEnv *env, jclass class, jobject buffer, jbyteArray key, jbyteArray iv, jboolean encrypt, jint offset, jint length) {
-    jbyte *what = (*env)->GetDirectBufferAddress(env, buffer) + offset;
-    unsigned char *keyBuff = (unsigned char *)(*env)->GetByteArrayElements(env, key, NULL);
-    unsigned char *ivBuff = (unsigned char *)(*env)->GetByteArrayElements(env, iv, NULL);
-    
-    AES_KEY akey;
-    if (!encrypt) {
-        AES_set_decrypt_key(keyBuff, 32 * 8, &akey);
-        AES_ige_encrypt(what, what, length, &akey, ivBuff, AES_DECRYPT);
-    } else {
-        AES_set_encrypt_key(keyBuff, 32 * 8, &akey);
-        AES_ige_encrypt(what, what, length, &akey, ivBuff, AES_ENCRYPT);
-    }
-    (*env)->ReleaseByteArrayElements(env, key, keyBuff, JNI_ABORT);
-    (*env)->ReleaseByteArrayElements(env, iv, ivBuff, 0);
-}
+*/
 
 JNIEXPORT void Java_org_telegram_messenger_Utilities_aesIgeEncryptionByteArray(JNIEnv *env, jclass class, jbyteArray buffer, jbyteArray key, jbyteArray iv, jboolean encrypt, jint offset, jint length) {
     unsigned char *bufferBuff = (unsigned char *) (*env)->GetByteArrayElements(env, buffer, NULL);
@@ -78,4 +63,43 @@ JNIEXPORT jint Java_org_telegram_messenger_Utilities_pbkdf2(JNIEnv *env, jclass 
     (*env)->ReleaseByteArrayElements(env, dst, dstBuff, 0);
 
     return result;
+}
+
+JNIEXPORT jint Java_org_telegram_messenger_Utilities_signEd25519hash(JNIEnv *env, jclass class, jbyteArray hash, jbyteArray secretKey, jbyteArray output) {
+    uint8_t *hashBuff = (*env)->GetByteArrayElements(env, hash, NULL);
+    uint8_t *secretBuff = (*env)->GetByteArrayElements(env, secretKey, NULL);
+    uint8_t *outputBuff = (*env)->GetByteArrayElements(env, output, NULL);
+    size_t len = 64;
+
+    EVP_PKEY *pkey = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, secretBuff, 32);
+    EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
+    EVP_DigestSignInit(md_ctx, NULL, NULL, NULL, pkey);
+
+    int r = (int) EVP_DigestSign(md_ctx, outputBuff, &len, hashBuff, 32);
+
+    EVP_MD_CTX_free(md_ctx);
+    EVP_PKEY_free(pkey);
+
+    (*env)->ReleaseByteArrayElements(env, hash, hashBuff, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, secretKey, secretBuff, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, output, outputBuff, 0);
+
+    return r;
+}
+
+JNIEXPORT jint Java_org_telegram_messenger_Utilities_privateToPublicX25519(JNIEnv *env, jclass class, jbyteArray secretKey, jbyteArray output) {
+    uint8_t *secretBuff = (*env)->GetByteArrayElements(env, secretKey, NULL);
+    uint8_t *outputBuff = (*env)->GetByteArrayElements(env, output, NULL);
+    size_t len = 32;
+
+    EVP_PKEY *pkey = EVP_PKEY_new_raw_private_key(EVP_PKEY_X25519, NULL, secretBuff, 32);
+
+    int r = EVP_PKEY_get_raw_public_key(pkey, outputBuff, &len);
+
+    EVP_PKEY_free(pkey);
+
+    (*env)->ReleaseByteArrayElements(env, secretKey, secretBuff, JNI_ABORT);
+    (*env)->ReleaseByteArrayElements(env, output, outputBuff, 0);
+
+    return r;
 }

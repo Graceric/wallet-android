@@ -193,7 +193,7 @@ static jint register_native(JavaVM *vm) {
 
 }  // namespace td_jni
 
-extern "C" int tonLibOnLoad(JavaVM *vm, JNIEnv *env) {
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
   static jint jni_version = td_jni::register_native(vm);  // call_once
   return jni_version;
 }
