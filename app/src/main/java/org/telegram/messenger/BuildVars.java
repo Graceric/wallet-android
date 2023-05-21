@@ -14,9 +14,20 @@ public class BuildVars {
 
     public static boolean DEBUG_VERSION = false;
     public static boolean LOGS_ENABLED = false;
-    public static boolean TON_WALLET_STANDALONE = true;
-    public static int BUILD_VERSION = 1002;
-    public static String BUILD_VERSION_STRING = "1.2";
+    public static boolean ASK_PASSCODE_ON_START = true;
+    public static final int BUILD_VERSION = 1002;
+    public static final String BUILD_VERSION_STRING = "1.2";
+
+    public static String[] FAST_IMPORT_MNEMONIC = null; /*new String[]{
+        "*", "*", "*", "*", "*", "*",
+        "*", "*", "*", "*", "*", "*",
+        "*", "*", "*", "*", "*", "*",
+        "*", "*", "*", "*", "*", "*"
+    };*/
+
+    /* Clear app storage when changing value */
+    public static final boolean USE_TESTNET = false;
+
 
     static {
         if (ApplicationLoader.applicationContext != null) {
