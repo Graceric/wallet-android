@@ -15,8 +15,8 @@ public class BuildVars {
     public static boolean DEBUG_VERSION = false;
     public static boolean LOGS_ENABLED = false;
     public static boolean ASK_PASSCODE_ON_START = true;
-    public static final int BUILD_VERSION = 1002;
-    public static final String BUILD_VERSION_STRING = "1.2";
+    public static final int BUILD_VERSION = 2000;
+    public static final String BUILD_VERSION_STRING = "2.0.0";
 
     public static final String TON_CONNECT_APP_NAME = "TON Wallet";
     public static final String TON_CONNECT_APP_VERSION = BUILD_VERSION_STRING;
