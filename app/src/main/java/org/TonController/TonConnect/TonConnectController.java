@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.ApplicationLoader;
+import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.Utilities;
 import org.ton.java.address.Address;
@@ -394,8 +395,8 @@ public class TonConnectController {
 
             JSONObject deviceInfo = new JSONObject()
                 .put("platform", "android")
-                .put("appName", "Tonkeeper")
-                .put("appVersion", "3.0.305")
+                .put("appName", BuildVars.TON_CONNECT_APP_NAME)
+                .put("appVersion", BuildVars.TON_CONNECT_APP_VERSION)
                 .put("maxProtocolVersion", 2)
                 .put("features", features);
 

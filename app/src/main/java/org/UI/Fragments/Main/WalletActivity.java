@@ -124,14 +124,20 @@ public class WalletActivity extends BaseFragment implements NotificationCenter.N
     private boolean canShowHiddenPull;
     private boolean wasPulled;
     private final int presentType;
+    private @Nullable UriParser.Result pendingTransfer;
 
     public WalletActivity () {
         this(WalletCreateReadyActivity.TYPE_READY_NONE);
     }
 
     public WalletActivity (int presentType) {
-        this.presentType = presentType;
+        this(presentType, null);
 
+    }
+
+    public WalletActivity (int presentType, @Nullable UriParser.Result pendingTransfer) {
+        this.presentType = presentType;
+        this.pendingTransfer = pendingTransfer;
     }
 
     @Override
@@ -753,6 +759,12 @@ public class WalletActivity extends BaseFragment implements NotificationCenter.N
                 builder.show();
             }
         });
+        if (pendingTransfer != null) {
+            AndroidUtilities.runOnUIThread(() -> {
+                onParseQrCode(pendingTransfer);
+                pendingTransfer = null;
+            });
+        }
     }
 
     @Override

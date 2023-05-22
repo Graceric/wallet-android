@@ -109,7 +109,7 @@ public class SendTonSheet extends BottomSheetPaginated implements Callbacks.Send
         if (pages[2] != null) ((SendTonCommentInputSheetPage) pages[2]).setInputFieldCommentString(link.comment);
 
         if (needUpdatePage) {
-            viewPager.setCurrentItem(link.amount != 0 ? 2: 1, false);
+          //  viewPager.setCurrentItem(link.amount != 0 ? 2: 1, false);
         }
     }
 

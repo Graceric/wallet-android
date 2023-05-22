@@ -12,7 +12,6 @@ import org.telegram.messenger.LocaleController;
 import org.telegram.messenger.R;
 import org.telegram.messenger.Utilities;
 import org.telegram.ui.ActionBar.ActionBar;
-import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.AlertsCreator;
@@ -44,17 +43,13 @@ public class PasscodeActivity extends BaseFragment {
         if (Build.VERSION.SDK_INT >= 23 && AndroidUtilities.allowScreenCapture()) {
             AndroidUtilities.setFlagSecure(this, false);
         }
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-        }
+        hideProgressDialog();
     }
 
     @Override
     public void finishFragment (boolean animated) {
         super.finishFragment(animated);
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-        }
+        hideProgressDialog();
     }
 
     @Override
@@ -110,28 +105,24 @@ public class PasscodeActivity extends BaseFragment {
         this.onSuccessPasscodeEnterDelegate = onSuccessPasscodeEnterDelegate;
     }
 
-    private AlertDialog progressDialog;
-
     public void checkPasscode (String passcode) {
         if (getParentActivity() == null) {
             return;
         }
-        progressDialog = new AlertDialog(getParentActivity(), 3);
-        progressDialog.setCanCacnel(false);
-        progressDialog.show();
+        showProgressDialog();
         getTonController().checkPasscode(passcode, () -> {
             passcodeView.onGoodPasscode(false);
             if (onSuccessPasscodeEnterDelegate != null) {
                 onSuccessPasscodeEnterDelegate.run(passcode);
             } else {
-                progressDialog.dismiss();
+                hideProgressDialog();
             }
         }, this::onPasscodeError);
     }
 
     private void onPasscodeError (String text, TonApi.Error error) {
         AndroidUtilities.runOnUIThread(() -> {
-            progressDialog.dismiss();
+            hideProgressDialog();
             if ("PASSCODE_INVALID".equals(text)) {
                 passcodeView.onWrongPasscode();
             } else {

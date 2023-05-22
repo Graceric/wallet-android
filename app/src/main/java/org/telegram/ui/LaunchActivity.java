@@ -24,6 +24,7 @@ import android.view.Window;
 
 import org.TonController.Parsers.UriParser;
 import org.TonController.TonController;
+import org.UI.Fragments.Create.WalletCreateReadyActivity;
 import org.UI.Fragments.Main.WalletActivity;
 import org.UI.Fragments.Create.WalletCreateStartActivity;
 import org.UI.Fragments.Passcode.PasscodeActivity;
@@ -53,6 +54,7 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
     private ActionBarLayout actionBarLayout;
     protected DrawerLayoutContainer drawerLayoutContainer;
     private AlertDialog visibleDialog;
+    private UriParser.Result pendingResult;
 
     private int currentAccount;
 
@@ -163,8 +165,10 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
         }*/ else {
             if (BuildVars.ASK_PASSCODE_ON_START) {
                 PasscodeActivity passcodeActivity = new PasscodeActivity();
-                passcodeActivity.setOnSuccessPasscodeDelegate(code ->
-                    passcodeActivity.presentFragment(new WalletActivity(), true));
+                passcodeActivity.setOnSuccessPasscodeDelegate(code -> {
+                    WalletActivity w = new WalletActivity(WalletCreateReadyActivity.TYPE_READY_NONE, pendingResult);
+                    passcodeActivity.presentFragment(w, true);
+                });
                 fragment = passcodeActivity;
             } else {
                 fragment = new WalletActivity();
@@ -214,6 +218,8 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
                 if (fragment instanceof WalletActivity) {
                     WalletActivity walletActivity = (WalletActivity) fragment;
                     walletActivity.onParseQrCode(parsedLink);
+                } else {
+                    pendingResult = parsedLink;
                 }
             }
         }

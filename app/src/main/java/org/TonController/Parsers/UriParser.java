@@ -86,7 +86,7 @@ public class UriParser {
         public final @Nullable String comment;
 
         private ResultTonLink (@NonNull String address, long amount, @Nullable String comment) {
-            this.address = address;
+            this.address = Utilities.normalizeAddress(address);
             this.amount = amount;
             this.comment = comment;
         }

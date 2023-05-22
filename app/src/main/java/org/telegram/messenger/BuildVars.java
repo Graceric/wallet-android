@@ -18,6 +18,9 @@ public class BuildVars {
     public static final int BUILD_VERSION = 1002;
     public static final String BUILD_VERSION_STRING = "1.2";
 
+    public static final String TON_CONNECT_APP_NAME = "TON Wallet";
+    public static final String TON_CONNECT_APP_VERSION = BUILD_VERSION_STRING;
+
     public static String[] FAST_IMPORT_MNEMONIC = null; /*new String[]{
         "*", "*", "*", "*", "*", "*",
         "*", "*", "*", "*", "*", "*",
