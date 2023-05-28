@@ -130,6 +130,8 @@ public class SendTonAmountInputSheetPage extends BottomSheetPageSimple {
     }
 
     public void setInputFieldSendAmountValue (long amountValue) {
+        if (inputFieldSendAmountValue == null && amountValue == 0) return;
+
         inputFieldSendAmountValue = BigInteger.valueOf(amountValue);
         sendAllCheckCell.setChecked(inputFieldSendAmountValue.compareTo(getters.getCurrentWalletBalance().getBalanceSafe()) == 0);
         editTextCell.setText(getters.getInputFieldSendAmountValue().toString());
